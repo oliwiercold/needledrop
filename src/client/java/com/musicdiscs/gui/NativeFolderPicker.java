@@ -23,6 +23,12 @@ public class NativeFolderPicker {
 	public static void pick(String startingPath, Consumer<String> onPicked) {
 		Thread t = new Thread(() -> {
 			try {
+				// LWJGL/GLFW windowing can leave the JVM's AWT headless-detection
+				// thinking there's no display available, which makes JFileChooser
+				// throw HeadlessException. Force it off before touching any AWT/Swing
+				// class -- the property is only read once, at first Toolkit use.
+				System.setProperty("java.awt.headless", "false");
+
 				try {
 					UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 				} catch (Exception ignored) {
@@ -39,7 +45,8 @@ public class NativeFolderPicker {
 					Minecraft.getInstance().execute(() -> onPicked.accept(picked));
 				}
 			} catch (Exception e) {
-				System.err.println("[musicdiscs] Folder picker failed: " + e.getMessage());
+				System.err.println("[musicdiscs] Folder picker failed:");
+				e.printStackTrace();
 			}
 		}, "musicdiscs-folder-picker");
 		t.setDaemon(true);

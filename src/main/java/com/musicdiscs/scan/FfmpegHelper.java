@@ -110,13 +110,22 @@ public class FfmpegHelper {
 		return null;
 	}
 
-	/** Converts to mono OGG Vorbis, which is what Minecraft's sound engine expects. */
+	/**
+	 * Converts to mono OGG Vorbis, which is what Minecraft's sound engine
+	 * expects. `-vn` is required, not cosmetic: source files with embedded
+	 * cover art have that art as an attached-picture "video" stream, and
+	 * without -vn ffmpeg muxes it into the .ogg as a Theora stream alongside
+	 * the audio -- Minecraft's decoder doesn't understand that and silently
+	 * plays no sound at all (confirmed by testing: the disc worked in every
+	 * other way, correct texture/name/registry entry, just no audio, and
+	 * ffprobe showed a "theora" video stream sitting next to the vorbis one).
+	 */
 	public boolean convertToOgg(DiscEntry entry, Path outputFile) {
 		try {
 			Files.createDirectories(outputFile.getParent());
 			Process p = new ProcessBuilder(
 					ffmpegPath, "-y", "-i", entry.sourceFile.toAbsolutePath().toString(),
-					"-ac", "1",
+					"-vn", "-ac", "1",
 					"-c:a", "libvorbis", "-q:a", "4",
 					outputFile.toAbsolutePath().toString()
 			).redirectErrorStream(true).start();

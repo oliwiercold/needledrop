@@ -2,7 +2,7 @@ package com.musicdiscs.gui;
 
 import com.musicdiscs.MusicDiscsMod;
 import com.musicdiscs.scan.DiscEntry;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
@@ -46,19 +46,19 @@ public class ScanProgressScreen extends Screen {
 	public void tick() {
 		if (done && this.minecraft != null) {
 			MusicDiscsMod.ENTRIES = result;
-			this.minecraft.setScreen(new MusicDiscsMenuScreen(grandparent));
+			this.minecraft.gui.setScreen(new MusicDiscsMenuScreen(grandparent));
 		}
 	}
 
 	@Override
-	public void render(GuiGraphics gfx, int mouseX, int mouseY, float partialTick) {
-		super.render(gfx, mouseX, mouseY, partialTick);
-		gfx.drawCenteredString(this.font, "Scanning & converting... " + progress + "%",
+	public void extractRenderState(GuiGraphicsExtractor gfx, int mouseX, int mouseY, float partialTick) {
+		super.extractRenderState(gfx, mouseX, mouseY, partialTick);
+		gfx.centeredText(this.font, "Scanning & converting... " + progress + "%",
 				this.width / 2, this.height / 2 - 10, 0xFFFFFF);
-		gfx.drawCenteredString(this.font, "Big libraries take a while -- ffmpeg is doing real work per file.",
+		gfx.centeredText(this.font, "Big libraries take a while -- ffmpeg is doing real work per file.",
 				this.width / 2, this.height / 2 + 10, 0xA0A0A0);
 		if (!MusicDiscsMod.isReadyForItemRegistration()) {
-			gfx.drawCenteredString(this.font, "Note: brand new songs need a relaunch before they're usable items.",
+			gfx.centeredText(this.font, "Note: brand new songs need a relaunch before they're usable items.",
 					this.width / 2, this.height / 2 + 26, 0x808080);
 		}
 	}

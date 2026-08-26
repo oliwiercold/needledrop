@@ -86,7 +86,6 @@ public class MusicDiscsMod implements ModInitializer {
 		Path oggCacheDir = cacheDir.resolve("ogg");
 		Path iconCacheDir = cacheDir.resolve("icons");
 		Path resourcePackDir = gameDir.resolve("resourcepacks").resolve("musicdiscs_generated");
-		Path datapackTemplateDir = cacheDir.resolve("datapack_template");
 
 		Set<String> extensions = Set.of(config.extensions);
 		List<DiscEntry> entries = MusicScanner.scan(Path.of(config.musicFolderPath), extensions, config.maxDiscs);
@@ -132,7 +131,10 @@ public class MusicDiscsMod implements ModInitializer {
 		System.out.println("[musicdiscs] Converted/verified " + entries.size() + " tracks.");
 
 		library.mergeScanResults(entries);
-		GeneratedPackWriter.write(entries, resourcePackDir, datapackTemplateDir);
+		List<Path> modResourceRoots = FabricLoader.getInstance().getModContainer(MODID)
+				.map(container -> container.getRootPaths())
+				.orElse(List.of());
+		GeneratedPackWriter.write(entries, resourcePackDir, modResourceRoots);
 
 		return entries;
 	}

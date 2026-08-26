@@ -94,33 +94,56 @@ public class DiscIconRenderer {
 		return (rb * perChannel + gb) * perChannel + bb;
 	}
 
-	/** Draws the shared vinyl-disc icon with the given label colour and writes it to targetPng. */
+	/**
+	 * Draws the shared vinyl-disc icon with the given label colour and writes
+	 * it to targetPng. Pixel-quantized (no antialiasing, hard-banded grey
+	 * rings by distance from centre) rather than smooth Graphics2D ovals --
+	 * a crisp, dithered look reads much better at 16x16 than an antialiased
+	 * circle does, closer to how vanilla's own disc icons look. The label
+	 * area (where vanilla just leaves a plain colour) is tinted to the
+	 * extracted dominant colour of the album art.
+	 */
 	public static void render(Color labelColor, Path targetPng) {
 		try {
 			BufferedImage img = new BufferedImage(ICON_SIZE, ICON_SIZE, BufferedImage.TYPE_INT_ARGB);
-			Graphics2D g = img.createGraphics();
-			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+			double center = (ICON_SIZE - 1) / 2.0;
+			double maxDist = center + 0.5;
 
-			// Outer body -- dark, slightly bluish, like vinyl.
-			g.setColor(new Color(24, 24, 28));
-			g.fillOval(0, 0, ICON_SIZE, ICON_SIZE);
+			for (int y = 0; y < ICON_SIZE; y++) {
+				for (int x = 0; x < ICON_SIZE; x++) {
+					double dist = Math.hypot(x - center, y - center);
+					if (dist > maxDist) {
+						img.setRGB(x, y, 0); // fully transparent outside the disc
+						continue;
+					}
 
-			// A couple of faint groove rings.
-			g.setColor(new Color(40, 40, 46));
-			g.drawOval(1, 1, ICON_SIZE - 3, ICON_SIZE - 3);
-			g.drawOval(2, 2, ICON_SIZE - 5, ICON_SIZE - 5);
+					double t = dist / maxDist; // 0 = centre, 1 = rim
+					int rgb;
+					if (t < 0.30) {
+						rgb = labelColor.getRGB();
+					} else if (t < 0.36) {
+						rgb = labelColor.darker().getRGB();
+					} else if (t < 0.55) {
+						rgb = 0xFF737373;
+					} else if (t < 0.62) {
+						rgb = 0xFF5A5A5A;
+					} else if (t < 0.80) {
+						rgb = 0xFF737373;
+					} else if (t < 0.86) {
+						rgb = 0xFF474747;
+					} else {
+						rgb = 0xFF2E2E2E;
+					}
+					img.setRGB(x, y, rgb | 0xFF000000);
+				}
+			}
 
-			// Label circle, tinted to the extracted colour.
-			g.setColor(labelColor);
-			g.fillOval(4, 4, ICON_SIZE - 8, ICON_SIZE - 8);
-			g.setColor(labelColor.darker());
-			g.drawOval(4, 4, ICON_SIZE - 8, ICON_SIZE - 8);
-
-			// Spindle hole.
-			g.setColor(new Color(10, 10, 12));
-			g.fillOval(7, 7, 2, 2);
-
-			g.dispose();
+			// Spindle hole, dead centre.
+			int mid = ICON_SIZE / 2;
+			img.setRGB(mid - 1, mid - 1, 0xFF1A1A1A);
+			img.setRGB(mid, mid - 1, 0xFF1A1A1A);
+			img.setRGB(mid - 1, mid, 0xFF1A1A1A);
+			img.setRGB(mid, mid, 0xFF1A1A1A);
 
 			Files.createDirectories(targetPng.getParent());
 			ImageIO.write(img, "png", targetPng.toFile());

@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version "${loom_version}"
+	id 'net.fabricmc.fabric-loom' version "${loom_version}"
 	id 'maven-publish'
 }
 
@@ -26,12 +26,12 @@ loom {
 }
 
 dependencies {
-	// Minecraft 26.1+ ships with official Mojang mappings support built into Loom --
-	// no separate Yarn artifact/version to track, just this one line.
+	// Minecraft 26.1+ uses official Mojang mappings built into Loom directly --
+	// no explicit `mappings` line, and plain `implementation` (not `modImplementation`)
+	// for both loader and fabric-api. See CLAUDE.md build error history.
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings loom.officialMojangMappings()
 	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 }
 
 java {

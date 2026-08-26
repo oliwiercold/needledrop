@@ -3,7 +3,7 @@ package com.musicdiscs.gui;
 import com.musicdiscs.MusicDiscsMod;
 import com.musicdiscs.config.LibraryStore;
 import com.musicdiscs.config.WorldSelectionStore;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.gui.components.EditBox;
@@ -116,7 +116,7 @@ public class SongListScreen extends Screen {
 
 		refreshRows();
 
-		this.addRenderableWidget(Button.builder(Component.literal("Back"), b -> this.minecraft.setScreen(parent))
+		this.addRenderableWidget(Button.builder(Component.literal("Back"), b -> this.minecraft.gui.setScreen(parent))
 				.bounds(this.width / 2 - 100, this.height - 28, 200, 20).build());
 	}
 
@@ -185,20 +185,20 @@ public class SongListScreen extends Screen {
 			worldSelection.enabledSongIds = workingEnabled;
 			worldSelection.save(worldSaveDir);
 		}
-		this.minecraft.setScreen(parent);
+		this.minecraft.gui.setScreen(parent);
 	}
 
 	@Override
-	public void render(GuiGraphics gfx, int mouseX, int mouseY, float partialTick) {
-		super.render(gfx, mouseX, mouseY, partialTick);
-		gfx.drawCenteredString(this.font, this.title, this.width / 2, 8, 0xFFFFFF);
+	public void extractRenderState(GuiGraphicsExtractor gfx, int mouseX, int mouseY, float partialTick) {
+		super.extractRenderState(gfx, mouseX, mouseY, partialTick);
+		gfx.centeredText(this.font, this.title, this.width / 2, 8, 0xFFFFFF);
 		String status = filteredIds.size() + " songs shown, " + workingEnabled.size() + " enabled"
 				+ (filteredIds.size() > ROWS_VISIBLE ? " -- scroll for more" : "");
-		gfx.drawCenteredString(this.font, status, this.width / 2, this.height - 46, 0xA0A0A0);
+		gfx.centeredText(this.font, status, this.width / 2, this.height - 46, 0xA0A0A0);
 	}
 
 	@Override
 	public void onClose() {
-		this.minecraft.setScreen(parent);
+		this.minecraft.gui.setScreen(parent);
 	}
 }

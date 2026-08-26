@@ -27,7 +27,7 @@ public abstract class TitleScreenMixin extends Screen {
 	@Inject(method = "init", at = @At("TAIL"))
 	private void musicdiscs$addButton(CallbackInfo ci) {
 		this.addRenderableWidget(Button.builder(Component.literal("Music Discs"), b ->
-				this.minecraft.setScreen(new MusicDiscsMenuScreen(this))
+				this.minecraft.gui.setScreen(new MusicDiscsMenuScreen(this))
 		).bounds(4, this.height - 24, 100, 20).build());
 	}
 }

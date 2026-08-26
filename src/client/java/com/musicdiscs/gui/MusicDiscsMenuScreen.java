@@ -1,7 +1,7 @@
 package com.musicdiscs.gui;
 
 import com.musicdiscs.MusicDiscsMod;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -34,34 +34,36 @@ public class MusicDiscsMenuScreen extends Screen {
 
 		y += 24;
 		this.addRenderableWidget(Button.builder(Component.literal("Rescan & Convert"), b ->
-				this.minecraft.setScreen(new ScanProgressScreen(parent))
+				this.minecraft.gui.setScreen(new ScanProgressScreen(parent))
 		).bounds(cx - 100, y, 200, 20).build());
 
 		y += 24;
 		this.addRenderableWidget(Button.builder(Component.literal("Edit Library"), b ->
-				this.minecraft.setScreen(new SongListScreen(this, null))
+				this.minecraft.gui.setScreen(new SongListScreen(this, null))
 		).bounds(cx - 100, y, 200, 20).build());
 
 		y += 24;
 		this.addRenderableWidget(Button.builder(Component.literal("Edit Per-World Discs"), b ->
-				this.minecraft.setScreen(new WorldSelectScreen(this))
+				this.minecraft.gui.setScreen(new WorldSelectScreen(this))
 		).bounds(cx - 100, y, 200, 20).build());
 
 		y += 24;
 		this.addRenderableWidget(Button.builder(Component.literal("Done"), b ->
-				this.minecraft.setScreen(parent)
+				this.minecraft.gui.setScreen(parent)
 		).bounds(cx - 100, y, 200, 20).build());
 	}
 
 	@Override
-	public void render(GuiGraphics gfx, int mouseX, int mouseY, float partialTick) {
-		super.render(gfx, mouseX, mouseY, partialTick);
-		gfx.drawCenteredString(this.font, this.title, this.width / 2, this.height / 2 - 90, 0xFFFFFF);
-		gfx.drawCenteredString(this.font, "Folder: " + MusicDiscsMod.CONFIG.musicFolderPath, this.width / 2, this.height - 30, 0xA0A0A0);
+	public void extractRenderState(GuiGraphicsExtractor gfx, int mouseX, int mouseY, float partialTick) {
+		super.extractRenderState(gfx, mouseX, mouseY, partialTick);
+		gfx.centeredText(this.font, this.title, this.width / 2, this.height / 2 - 90, 0xFFFFFF);
+		gfx.centeredText(this.font, "Folder: " + MusicDiscsMod.CONFIG.musicFolderPath, this.width / 2, this.height - 40, 0xA0A0A0);
+		gfx.centeredText(this.font, "Newly added songs need a game restart before they're usable items.",
+				this.width / 2, this.height - 26, 0x808080);
 	}
 
 	@Override
 	public void onClose() {
-		this.minecraft.setScreen(parent);
+		this.minecraft.gui.setScreen(parent);
 	}
 }

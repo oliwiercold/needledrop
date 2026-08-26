@@ -2,7 +2,7 @@ package com.musicdiscs.item;
 
 import com.musicdiscs.config.ModConfig;
 import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootPool;
@@ -22,21 +22,21 @@ import java.util.Map;
  */
 public class LootHooks {
 
-	private static final ResourceLocation[] TARGET_TABLES = {
-			BuiltInLootTables.ABANDONED_MINESHAFT.location(),
-			BuiltInLootTables.END_CITY_TREASURE.location(),
-			BuiltInLootTables.STRONGHOLD_CORRIDOR.location(),
-			BuiltInLootTables.SIMPLE_DUNGEON.location(),
-			BuiltInLootTables.BURIED_TREASURE.location(),
+	private static final Identifier[] TARGET_TABLES = {
+			BuiltInLootTables.ABANDONED_MINESHAFT.identifier(),
+			BuiltInLootTables.END_CITY_TREASURE.identifier(),
+			BuiltInLootTables.STRONGHOLD_CORRIDOR.identifier(),
+			BuiltInLootTables.SIMPLE_DUNGEON.identifier(),
+			BuiltInLootTables.BURIED_TREASURE.identifier(),
 	};
 
 	public static void register(ModConfig config) {
 		LootTableEvents.MODIFY.register((key, tableBuilder, source, registries) -> {
 			if (!source.isBuiltin() || ModItems.REGISTERED.isEmpty()) return;
 
-			for (ResourceLocation target : TARGET_TABLES) {
-				if (key.location().equals(target)) {
-					LootPool.Builder pool = LootPool.builder()
+			for (Identifier target : TARGET_TABLES) {
+				if (key.identifier().equals(target)) {
+					LootPool.Builder pool = LootPool.lootPool()
 							.setRolls(ConstantValue.exactly(1))
 							.when(LootItemRandomChanceCondition.randomChance((float) config.lootChance));
 
@@ -49,7 +49,7 @@ public class LootHooks {
 						}
 					}
 
-					if (added > 0) tableBuilder.pool(pool);
+					if (added > 0) tableBuilder.withPool(pool);
 					break;
 				}
 			}
