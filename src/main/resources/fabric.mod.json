@@ -1,0 +1,23 @@
+{
+	"schemaVersion": 1,
+	"id": "musicdiscs",
+	"version": "${version}",
+	"name": "Music Discs From Folder",
+	"description": "Turns the songs in your local Music folder into findable, playable music discs with cover-color icons.",
+	"authors": ["you"],
+	"contact": {},
+	"license": "CC0-1.0",
+	"environment": "*",
+	"entrypoints": {
+		"main": ["com.musicdiscs.MusicDiscsMod"],
+		"client": ["com.musicdiscs.MusicDiscsClientMod"]
+	},
+	"mixins": [
+		"musicdiscs.client.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.19.3",
+		"minecraft": "~26.2",
+		"fabric-api": "*"
+	}
+}
