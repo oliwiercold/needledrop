@@ -95,55 +95,63 @@ public class DiscIconRenderer {
 	}
 
 	/**
-	 * Draws the shared vinyl-disc icon with the given label colour and writes
-	 * it to targetPng. Pixel-quantized (no antialiasing, hard-banded grey
-	 * rings by distance from centre) rather than smooth Graphics2D ovals --
-	 * a crisp, dithered look reads much better at 16x16 than an antialiased
-	 * circle does, closer to how vanilla's own disc icons look. The label
-	 * area (where vanilla just leaves a plain colour) is tinted to the
-	 * extracted dominant colour of the album art.
+	 * Pixel template for the disc icon, same 16x16 layout/proportions as a
+	 * classic Minecraft music disc item icon (own palette, drawn by hand to
+	 * match that shape -- not a copy of any game asset): '.' transparent,
+	 * 'A'/'C' the two darker rim greys, 'B'/'D'/'E' the three lighter body
+	 * greys, 'W' the label area (tinted to the extracted dominant colour),
+	 * 'S' the small spindle notch within the label (tinted darker).
+	 */
+	private static final String[] TEMPLATE = {
+			"................",
+			"................",
+			"................",
+			"....BBBBB.......",
+			"..BBBDDDDDBBB...",
+			".BDDDDEDEEDDDB..",
+			"BDDEEDWWWDDEDDB.",
+			"BDEDDWWSWWDDEDB.",
+			"BDDEDDWWWDEDDDB.",
+			"BCDDDEEDEDDDDCB.",
+			".ACCCDDDDDCCCA..",
+			"..AAACCCCCAAA...",
+			"....AAAAA.......",
+			"................",
+			"................",
+			"................",
+	};
+
+	/**
+	 * Draws the shared vinyl-disc icon (see TEMPLATE) with the given label
+	 * colour and writes it to targetPng. Pixel-quantized (no antialiasing) --
+	 * a crisp, dithered look reads much better at 16x16 than a smooth
+	 * Graphics2D-drawn circle. The label area (where a real disc's own
+	 * artwork would go) is tinted to the extracted dominant colour of the
+	 * album art instead of being left a flat colour.
 	 */
 	public static void render(Color labelColor, Path targetPng) {
 		try {
 			BufferedImage img = new BufferedImage(ICON_SIZE, ICON_SIZE, BufferedImage.TYPE_INT_ARGB);
-			double center = (ICON_SIZE - 1) / 2.0;
-			double maxDist = center + 0.5;
+			int labelRgb = labelColor.getRGB() | 0xFF000000;
+			int spindleRgb = labelColor.darker().getRGB() | 0xFF000000;
 
 			for (int y = 0; y < ICON_SIZE; y++) {
+				String row = TEMPLATE[y];
 				for (int x = 0; x < ICON_SIZE; x++) {
-					double dist = Math.hypot(x - center, y - center);
-					if (dist > maxDist) {
-						img.setRGB(x, y, 0); // fully transparent outside the disc
-						continue;
-					}
-
-					double t = dist / maxDist; // 0 = centre, 1 = rim
-					int rgb;
-					if (t < 0.30) {
-						rgb = labelColor.getRGB();
-					} else if (t < 0.36) {
-						rgb = labelColor.darker().getRGB();
-					} else if (t < 0.55) {
-						rgb = 0xFF737373;
-					} else if (t < 0.62) {
-						rgb = 0xFF5A5A5A;
-					} else if (t < 0.80) {
-						rgb = 0xFF737373;
-					} else if (t < 0.86) {
-						rgb = 0xFF474747;
-					} else {
-						rgb = 0xFF2E2E2E;
-					}
-					img.setRGB(x, y, rgb | 0xFF000000);
+					char c = row.charAt(x);
+					int rgb = switch (c) {
+						case 'A' -> 0xFF2E2E2E;
+						case 'B' -> 0xFF707070;
+						case 'C' -> 0xFF525252;
+						case 'D' -> 0xFF8C8C8C;
+						case 'E' -> 0xFF9E9E9E;
+						case 'W' -> labelRgb;
+						case 'S' -> spindleRgb;
+						default -> 0; // '.' -- fully transparent
+					};
+					img.setRGB(x, y, rgb);
 				}
 			}
-
-			// Spindle hole, dead centre.
-			int mid = ICON_SIZE / 2;
-			img.setRGB(mid - 1, mid - 1, 0xFF1A1A1A);
-			img.setRGB(mid, mid - 1, 0xFF1A1A1A);
-			img.setRGB(mid - 1, mid, 0xFF1A1A1A);
-			img.setRGB(mid, mid, 0xFF1A1A1A);
 
 			Files.createDirectories(targetPng.getParent());
 			ImageIO.write(img, "png", targetPng.toFile());

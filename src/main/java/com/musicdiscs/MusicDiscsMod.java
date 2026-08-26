@@ -35,6 +35,15 @@ public class MusicDiscsMod implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
+		// Must happen before ANYTHING else touches AWT, including indirectly --
+		// java.awt.headless is read once by GraphicsEnvironment and then cached
+		// forever; if any thread (e.g. one of Minecraft's own asset-loading
+		// workers using ImageIO for textures) checks it first, setting this
+		// later -- even at the top of NativeFolderPicker's own thread, tried
+		// first -- has no effect and JFileChooser throws HeadlessException.
+		// Mod init is the earliest hook we get, before Minecraft itself exists.
+		System.setProperty("java.awt.headless", "false");
+
 		CONFIG = ModConfig.load();
 		LIBRARY = LibraryStore.load();
 

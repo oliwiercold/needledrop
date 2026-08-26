@@ -19,11 +19,20 @@ import java.util.List;
  */
 public class ScanProgressScreen extends Screen {
 
+	/**
+	 * Rescanning an already-fully-cached library (nothing new to convert)
+	 * finishes in well under a second -- without a floor, the screen would
+	 * flash and vanish before it's even readable. This just makes sure
+	 * "Done!" stays up long enough to actually see.
+	 */
+	private static final long MIN_VISIBLE_MILLIS = 1200;
+
 	private final Screen grandparent; // where "Done" on the menu should return to, once we're back at the menu
 
 	private volatile int progress = 0;
 	private volatile boolean done = false;
 	private volatile List<DiscEntry> result;
+	private long shownAt;
 
 	public ScanProgressScreen(Screen grandparent) {
 		super(Component.literal("Scanning Music Folder"));
@@ -32,6 +41,7 @@ public class ScanProgressScreen extends Screen {
 
 	@Override
 	protected void init() {
+		this.shownAt = System.currentTimeMillis();
 		Thread t = new Thread(() -> {
 			List<DiscEntry> entries = MusicDiscsMod.runScanAndConvert(
 					MusicDiscsMod.CONFIG, MusicDiscsMod.LIBRARY, p -> progress = p);
@@ -44,7 +54,7 @@ public class ScanProgressScreen extends Screen {
 
 	@Override
 	public void tick() {
-		if (done && this.minecraft != null) {
+		if (done && this.minecraft != null && System.currentTimeMillis() - shownAt >= MIN_VISIBLE_MILLIS) {
 			MusicDiscsMod.ENTRIES = result;
 			this.minecraft.gui.setScreen(new MusicDiscsMenuScreen(grandparent));
 		}
@@ -53,8 +63,13 @@ public class ScanProgressScreen extends Screen {
 	@Override
 	public void extractRenderState(GuiGraphicsExtractor gfx, int mouseX, int mouseY, float partialTick) {
 		super.extractRenderState(gfx, mouseX, mouseY, partialTick);
-		gfx.centeredText(this.font, "Scanning & converting... " + progress + "%",
-				this.width / 2, this.height / 2 - 10, 0xFFFFFF);
+		if (done) {
+			gfx.centeredText(this.font, "Done! " + result.size() + " discs ready.",
+					this.width / 2, this.height / 2 - 10, 0x55FF55);
+		} else {
+			gfx.centeredText(this.font, "Scanning & converting... " + progress + "%",
+					this.width / 2, this.height / 2 - 10, 0xFFFFFF);
+		}
 		gfx.centeredText(this.font, "Big libraries take a while -- ffmpeg is doing real work per file.",
 				this.width / 2, this.height / 2 + 10, 0xA0A0A0);
 		if (!MusicDiscsMod.isReadyForItemRegistration()) {

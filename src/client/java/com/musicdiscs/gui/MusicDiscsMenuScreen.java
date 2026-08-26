@@ -59,7 +59,7 @@ public class MusicDiscsMenuScreen extends Screen {
 		gfx.centeredText(this.font, this.title, this.width / 2, this.height / 2 - 90, 0xFFFFFF);
 		gfx.centeredText(this.font, "Folder: " + MusicDiscsMod.CONFIG.musicFolderPath, this.width / 2, this.height - 40, 0xA0A0A0);
 		gfx.centeredText(this.font, "Newly added songs need a game restart before they're usable items.",
-				this.width / 2, this.height - 26, 0x808080);
+				this.width / 2, this.height - 26, 0xFFFF55);
 	}
 
 	@Override
