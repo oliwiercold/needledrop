@@ -21,7 +21,7 @@ public class MusicDiscsClientMod implements ClientModInitializer {
 		// this can't be done directly in onInitializeClient().
 		ClientLifecycleEvents.CLIENT_STARTED.register(client -> {
 			PackRepository packs = client.getResourcePackRepository();
-			String packId = "file/musicdiscs_generated";
+			String packId = "file/Needledrop";
 			if (packs.isAvailable(packId) && !packs.getSelectedIds().contains(packId)) {
 				packs.addPack(packId);
 				client.reloadResourcePacks();

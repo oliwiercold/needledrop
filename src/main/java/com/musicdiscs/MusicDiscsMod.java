@@ -92,8 +92,17 @@ public class MusicDiscsMod implements ModInitializer {
 		Path cacheDir = gameDir.resolve("musicdiscs_cache");
 		Path oggCacheDir = cacheDir.resolve("ogg");
 		Path iconCacheDir = cacheDir.resolve("icons");
-		Path resourcePackDir = gameDir.resolve("resourcepacks").resolve("musicdiscs_generated");
+		Path resourcePackDir = gameDir.resolve("resourcepacks").resolve("Needledrop");
 		Path datapackTemplateDir = cacheDir.resolve("datapack_template");
+
+		// One-time migration: earlier versions wrote the generated pack to a
+		// folder named "musicdiscs_generated" (an internal id, not meant to
+		// be seen -- Minecraft shows a folder pack's name as its literal
+		// folder name). Renamed to "Needledrop" so the Resource Packs screen
+		// reads nicely; deleting the old one here avoids leaving a stale
+		// duplicate pack sitting next to the new one after an upgrade. It's
+		// entirely regenerated content, so removing it is always safe.
+		deleteRecursively(gameDir.resolve("resourcepacks").resolve("musicdiscs_generated"));
 
 		Set<String> extensions = Set.of(config.extensions);
 		List<DiscEntry> entries = MusicScanner.scan(Path.of(config.musicFolderPath), extensions, config.maxDiscs);
@@ -163,6 +172,21 @@ public class MusicDiscsMod implements ModInitializer {
 
 	public static boolean itemsAlreadyRegistered() {
 		return itemsAlreadyRegistered;
+	}
+
+	private static void deleteRecursively(Path root) {
+		if (!Files.exists(root)) return;
+		try (var walk = Files.walk(root)) {
+			walk.sorted(java.util.Comparator.reverseOrder()).forEach(p -> {
+				try {
+					Files.delete(p);
+				} catch (java.io.IOException ignored) {
+					// Leftover file we couldn't remove -- harmless, not worth failing boot over.
+				}
+			});
+		} catch (java.io.IOException ignored) {
+			// Couldn't even walk it -- leave it alone.
+		}
 	}
 
 	private static void logReadyMessage(List<DiscEntry> entries) {

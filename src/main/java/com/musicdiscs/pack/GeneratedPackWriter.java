@@ -16,9 +16,12 @@ import java.util.List;
 /**
  * Turns the list of scanned/converted DiscEntry objects into:
  *
- *  1. A real resource pack under <gameDir>/resourcepacks/musicdiscs_generated/
+ *  1. A real resource pack under <gameDir>/resourcepacks/Needledrop/
  *     (sounds, item icons, item models, lang) -- shows up under
- *     Options > Resource Packs; MusicDiscsClientMod auto-enables it.
+ *     Options > Resource Packs; MusicDiscsClientMod auto-enables it. The
+ *     folder name is also literally what shows as the pack's title in that
+ *     screen (Minecraft derives it from the folder name, not pack.mcmeta),
+ *     so it's picked deliberately rather than left as an internal id.
  *
  *  2. jukebox_song datapack entries, written to an external folder
  *     (<gameDir>/musicdiscs_cache/datapack_template/) that
@@ -54,12 +57,24 @@ public class GeneratedPackWriter {
 
 		JsonObject pack = new JsonObject();
 		JsonObject packInner = new JsonObject();
-		packInner.addProperty("description", "Music Discs From Folder (generated, safe to delete and relaunch to rebuild)");
+		packInner.addProperty("description", "Disc icons, sounds & names for Needledrop -- auto-generated, safe to delete");
 		int resourceFormat = currentPackFormatMajor(PackType.CLIENT_RESOURCES);
 		packInner.addProperty("min_format", resourceFormat);
 		packInner.addProperty("max_format", resourceFormat);
 		pack.add("pack", packInner);
 		writeJson(root.resolve("pack.mcmeta"), pack);
+
+		// Shown next to the pack's title in the Resource Packs screen.
+		// Bundled in the mod's own jar rather than generated, since it's
+		// static regardless of what's in the user's library.
+		Path packIcon = root.resolve("pack.png");
+		if (!Files.exists(packIcon)) {
+			try (java.io.InputStream in = GeneratedPackWriter.class.getResourceAsStream("/assets/musicdiscs/pack_icon.png")) {
+				if (in != null) {
+					Files.copy(in, packIcon, StandardCopyOption.REPLACE_EXISTING);
+				}
+			}
+		}
 
 		JsonObject soundsJson = new JsonObject();
 		JsonObject langJson = new JsonObject();
