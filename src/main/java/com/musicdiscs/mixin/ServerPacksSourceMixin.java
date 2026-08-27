@@ -44,6 +44,15 @@ public class ServerPacksSourceMixin {
 				.resolve("musicdiscs_cache").resolve("datapack_template").resolve("data");
 		if (Files.isDirectory(dataDir)) {
 			builder.pushAssetPath(PackType.SERVER_DATA, dataDir);
+			// createVanillaPackSource() calls exposeNamespace("minecraft") before
+			// this redirect runs, and VanillaPackResources.getNamespaces() just
+			// returns that fixed set verbatim -- it's not derived from what's
+			// actually on disk. The registry loader (for jukebox_song and every
+			// other dynamic registry) asks getNamespaces() which namespaces to
+			// even look under, so without this, our data sits in the pushed
+			// path but is never discovered: getResource() would happily find it
+			// by exact id, but nothing ever asks for that id in the first place.
+			builder.exposeNamespace("musicdiscs");
 		}
 		return builder.build(info);
 	}
