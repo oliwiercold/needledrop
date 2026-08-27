@@ -97,12 +97,20 @@ discs.**
 Run `/reload` once in that world.
 
 **I explored a whole structure and never found a single disc.**
-Loot is a flat 15% chance *per eligible chest* (abandoned mineshafts, End
-city treasure, strongholds, dungeons, buried treasure) — it doesn't go up
-with a bigger library, only the *variety* does if a roll succeeds. A
-single structure often only has a handful of chests, so finding zero in
-one visit is normal bad luck, not a bug. Want better odds? Set
-`"lootChance"` higher (e.g. `0.4`) in `config/musicdiscs.json`.
+The chance is *per eligible chest*, not per structure or per song — it
+doesn't go up with a bigger library, only the *variety* does if a roll
+succeeds. A single structure often only has a handful of chests, so
+finding zero in one visit can still happen. Chests are more common in
+the Nether and End, so the odds are higher there by default too:
+
+| Where | Structures | Default chance per chest |
+|---|---|---|
+| Overworld | mineshafts, strongholds, dungeons, buried treasure | 35% |
+| Nether | bastion remnants, nether fortresses | 50% |
+| End | End city treasure (including the ship) | 60% |
+
+Want different odds? Edit `"lootChanceOverworld"` / `"lootChanceNether"` /
+`"lootChanceEnd"` in `config/musicdiscs.json` (0.0–1.0 each).
 
 **ffmpeg errors in the log / "Could not run ffmpeg."**
 The mod couldn't find or run ffmpeg. Confirm `ffmpeg -version` works in a

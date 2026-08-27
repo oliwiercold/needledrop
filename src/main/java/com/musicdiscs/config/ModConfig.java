@@ -32,8 +32,17 @@ public class ModConfig {
 	 */
 	public int maxDiscs = 1_000_000;
 
-	/** Chance (0.0-1.0) that a hooked loot chest rolls a bonus disc. */
-	public double lootChance = 0.15;
+	/**
+	 * Chance (0.0-1.0) that a hooked loot chest rolls a bonus disc, split by
+	 * dimension. Nether and End structures default higher -- their chests
+	 * tend to be faster to reach once you're geared for that stage (bastions/
+	 * fortresses, elytra + end cities), so a flat chance would make
+	 * disc-finding feel like it dries up in the late game instead of staying
+	 * worthwhile.
+	 */
+	public double lootChanceOverworld = 0.35;
+	public double lootChanceNether = 0.5;
+	public double lootChanceEnd = 0.6;
 
 	/** File extensions we'll look at when scanning the music folder. */
 	public String[] extensions = {"mp3", "flac", "wav", "m4a", "ogg", "opus"};

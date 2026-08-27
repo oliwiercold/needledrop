@@ -52,9 +52,11 @@ opens a hub with: browse-for-folder (native OS picker), rescan & convert
 Per-World Discs" — pick a save, then the same checklist scoped to just
 that world; any world you haven't customized inherits the global list
 automatically). There is no artificial cap on how many discs/songs are
-allowed. Discs can also turn up as loot (abandoned mineshafts, End city
-treasure, strongholds, dungeons, buried treasure — 15% chance per
-eligible chest by default, config `lootChance`), or be `/give`n directly.
+allowed. Discs can also turn up as loot (Overworld structures, Nether
+bastions/fortresses, End city treasure — per-dimension chance per
+eligible chest, config `lootChanceOverworld`/`lootChanceNether`/
+`lootChanceEnd`, higher in Nether/End by design — see Session log), or
+be `/give`n directly.
 
 **Scope: singleplayer / "Open to LAN" only, by design.** A real dedicated
 server doesn't scan anything (there's no single "the server's Music
@@ -259,6 +261,21 @@ chronological, since later fixes sometimes build on earlier ones.
     art). This is a legitimate, standard Fabric technique — a mod's own
     `assets/minecraft/...` resources simply override vanilla's when the
     resource manager merges packs; no special API needed.
+11. **Loot rebalanced, and split by dimension.** The single flat
+    `lootChance` (15%) felt too rare and, since only Overworld + End
+    tables were ever targeted, gave the Nether nothing at all. Replaced
+    with three config values (`lootChanceOverworld`=0.35,
+    `lootChanceNether`=0.5, `lootChanceEnd`=0.6 — see `ModConfig.java`)
+    and `LootHooks.java` now keys a `Map<Identifier, Double>` of target
+    table → chance instead of one shared value. Added the 4 bastion
+    remnant tables (`BASTION_TREASURE/OTHER/BRIDGE/HOGLIN_STABLE`) and
+    `NETHER_BRIDGE` (fortress) as Nether targets — previously no Nether
+    structure was hooked at all. Numbers were reasoned from a rough
+    estimate of chests-per-hour for an elytra-equipped player farming End
+    cities specifically (the user's stated benchmark: ~15 new discs/hour
+    out of a large library at that stage) rather than measured in-game —
+    **treat these as a first pass and expect the user to ask for further
+    tuning once they've actually played with it.**
 
 ## Known open items (not yet done, worth revisiting)
 
@@ -308,11 +325,15 @@ chronological, since later fixes sometimes build on earlier ones.
   needs a relaunch to exist as a real, giveable/lootable item. Toggling
   an *already-known* song's enabled state doesn't need a relaunch, just
   a world reload / `/reload`.
-- Loot chance is flat per eligible chest (default 15%, config
-  `lootChance`) and does **not** scale with library size — a bigger
-  library means more *variety* if a roll succeeds, not a better chance
-  of a roll succeeding. Eligible loot tables: abandoned mineshaft, End
-  city treasure, stronghold corridor, simple dungeon, buried treasure.
+- Loot chance is per eligible chest (not per structure, not per song) and
+  does **not** scale with library size — a bigger library means more
+  *variety* if a roll succeeds, not a better chance of a roll succeeding.
+  As of the loot rebalance (see Session log), chance is per-dimension:
+  Overworld tables (abandoned mineshaft, stronghold corridor, simple
+  dungeon, buried treasure) default to 35%; Nether tables (all 4 bastion
+  loot tables + nether fortress) default to 50%; End city treasure
+  defaults to 60%. Config keys: `lootChanceOverworld`/`lootChanceNether`/
+  `lootChanceEnd`.
 
 ## User's local environment
 
