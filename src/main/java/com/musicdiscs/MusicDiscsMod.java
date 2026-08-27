@@ -37,11 +37,9 @@ public class MusicDiscsMod implements ModInitializer {
 	public void onInitialize() {
 		// Must happen before ANYTHING else touches AWT, including indirectly --
 		// java.awt.headless is read once by GraphicsEnvironment and then cached
-		// forever; if any thread (e.g. one of Minecraft's own asset-loading
-		// workers using ImageIO for textures) checks it first, setting this
-		// later -- even at the top of NativeFolderPicker's own thread, tried
-		// first -- has no effect and JFileChooser throws HeadlessException.
-		// Mod init is the earliest hook we get, before Minecraft itself exists.
+		// forever, and Minecraft's own asset-loading workers use ImageIO (and
+		// so AWT) very early. Mod init is the earliest hook available, before
+		// Minecraft itself exists.
 		System.setProperty("java.awt.headless", "false");
 
 		CONFIG = ModConfig.load();
@@ -95,6 +93,8 @@ public class MusicDiscsMod implements ModInitializer {
 		Path oggCacheDir = cacheDir.resolve("ogg");
 		Path iconCacheDir = cacheDir.resolve("icons");
 		Path resourcePackDir = gameDir.resolve("resourcepacks").resolve("musicdiscs_generated");
+		Path datapackTemplateDir = cacheDir.resolve("datapack_template");
+		DiscIconRenderer.setTemplateImagePath(gameDir.resolve("template_assets").resolve("disc_template.png"));
 
 		Set<String> extensions = Set.of(config.extensions);
 		List<DiscEntry> entries = MusicScanner.scan(Path.of(config.musicFolderPath), extensions, config.maxDiscs);
@@ -140,26 +140,16 @@ public class MusicDiscsMod implements ModInitializer {
 		System.out.println("[musicdiscs] Converted/verified " + entries.size() + " tracks.");
 
 		library.mergeScanResults(entries);
-		List<Path> modResourceRoots = FabricLoader.getInstance().getModContainer(MODID)
-				.map(container -> container.getRootPaths())
-				.orElse(List.of());
-		GeneratedPackWriter.write(entries, resourcePackDir, modResourceRoots);
+		GeneratedPackWriter.write(entries, resourcePackDir, datapackTemplateDir);
 
 		return entries;
 	}
 
-	public static boolean isReadyForItemRegistration() {
-		return !itemsAlreadyRegistered;
+	public static boolean itemsAlreadyRegistered() {
+		return itemsAlreadyRegistered;
 	}
 
 	private static void logReadyMessage(List<DiscEntry> entries) {
-		System.out.println("[musicdiscs] Setup complete. " + entries.size() + " discs are ready. " +
-				"Remember to enable the 'musicdiscs_generated' resource pack in Options > Resource Packs, " +
-				"and see the README if songs found in loot don't make sound.");
-		System.out.println("[musicdiscs] Test commands (paste in-game, creative mode):");
-		for (DiscEntry e : entries) {
-			System.out.println("  /give @s musicdiscs:" + e.itemId() +
-					"  (should already carry its song -- " + e.artist + " - " + e.title + ")");
-		}
+		System.out.println("[musicdiscs] Setup complete. " + entries.size() + " discs are ready.");
 	}
 }

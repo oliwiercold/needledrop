@@ -61,9 +61,9 @@ public class WorldSelectScreen extends Screen {
 	@Override
 	public void extractRenderState(GuiGraphicsExtractor gfx, int mouseX, int mouseY, float partialTick) {
 		super.extractRenderState(gfx, mouseX, mouseY, partialTick);
-		gfx.centeredText(this.font, this.title, this.width / 2, 8, 0xFFFFFF);
+		gfx.centeredText(this.font, this.title, this.width / 2, 8, 0xFFFFFFFF);
 		if (saves.isEmpty()) {
-			gfx.centeredText(this.font, "No saves found yet -- create a world first.", this.width / 2, this.height / 2, 0xA0A0A0);
+			gfx.centeredText(this.font, "No saves found yet -- create a world first.", this.width / 2, this.height / 2, 0xFFA0A0A0);
 		}
 	}
 

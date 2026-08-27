@@ -65,16 +65,16 @@ public class ScanProgressScreen extends Screen {
 		super.extractRenderState(gfx, mouseX, mouseY, partialTick);
 		if (done) {
 			gfx.centeredText(this.font, "Done! " + result.size() + " discs ready.",
-					this.width / 2, this.height / 2 - 10, 0x55FF55);
+					this.width / 2, this.height / 2 - 10, 0xFF55FF55);
 		} else {
 			gfx.centeredText(this.font, "Scanning & converting... " + progress + "%",
-					this.width / 2, this.height / 2 - 10, 0xFFFFFF);
+					this.width / 2, this.height / 2 - 10, 0xFFFFFFFF);
 		}
 		gfx.centeredText(this.font, "Big libraries take a while -- ffmpeg is doing real work per file.",
-				this.width / 2, this.height / 2 + 10, 0xA0A0A0);
-		if (!MusicDiscsMod.isReadyForItemRegistration()) {
+				this.width / 2, this.height / 2 + 10, 0xFFA0A0A0);
+		if (MusicDiscsMod.itemsAlreadyRegistered()) {
 			gfx.centeredText(this.font, "Note: brand new songs need a relaunch before they're usable items.",
-					this.width / 2, this.height / 2 + 26, 0x808080);
+					this.width / 2, this.height / 2 + 26, 0xFF808080);
 		}
 	}
 

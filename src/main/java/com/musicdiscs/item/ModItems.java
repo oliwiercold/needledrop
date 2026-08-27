@@ -11,6 +11,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.JukeboxSong;
+import net.minecraft.world.item.Rarity;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -29,20 +30,11 @@ import java.util.Map;
  * selection (which can change anytime).
  *
  * `.jukeboxPlayable(songKey)` needs a REAL jukebox_song registry entry, not
- * just a Holder with the right data -- confirmed by testing: an in-memory
- * Holder.direct(...) avoids the boot-time crash (see below) but then discs
- * are silently soundless in an actual jukebox, because
- * JukeboxSongPlayer.play() resolves the sound to play via
- * registry.getId(song), which is IDENTITY-based (Reference2IntOpenHashMap)
- * and only ever returns a real id for objects that are actually IN the
- * registry. GeneratedPackWriter now writes the jukebox_song JSON directly
- * into this mod's own resource root (via FabricLoader's ModContainer, see
- * MusicDiscsMod.runScanAndConvert) rather than a separate external folder --
- * that root is already merged into Minecraft's "vanilla" pack the same way
- * any mod's static assets/data are, so the entries are present even during
- * the early world-creation preview (which reads only vanilla + built-in mod
- * data, no per-world folder -- a per-world datapack copy, tried first,
- * cannot reach that step because no such folder exists yet at that point).
+ * just a Holder with the right data: actual jukebox playback resolves the
+ * sound to play via registry.getId(song), which is identity-based and only
+ * returns a real id for objects that are genuinely in the registry. See
+ * ServerPacksSourceMixin for how the generated jukebox_song data reaches
+ * that registry.
  */
 public class ModItems {
 
@@ -61,7 +53,7 @@ public class ModItems {
 
 			ResourceKey<JukeboxSong> songKey = ResourceKey.create(Registries.JUKEBOX_SONG, Identifier.fromNamespaceAndPath(MODID, entry.songId()));
 
-			Item item = new Item(new Item.Properties().setId(itemKey).stacksTo(1).jukeboxPlayable(songKey));
+			Item item = new Item(new Item.Properties().setId(itemKey).stacksTo(1).rarity(Rarity.UNCOMMON).jukeboxPlayable(songKey));
 			Registry.register(BuiltInRegistries.ITEM, itemKey, item);
 			REGISTERED.put(entry.itemId(), item);
 		}

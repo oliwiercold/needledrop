@@ -95,62 +95,66 @@ public class DiscIconRenderer {
 	}
 
 	/**
-	 * Pixel template for the disc icon, same 16x16 layout/proportions as a
-	 * classic Minecraft music disc item icon (own palette, drawn by hand to
-	 * match that shape -- not a copy of any game asset): '.' transparent,
-	 * 'A'/'C' the two darker rim greys, 'B'/'D'/'E' the three lighter body
-	 * greys, 'W' the label area (tinted to the extracted dominant colour),
-	 * 'S' the small spindle notch within the label (tinted darker).
+	 * A real disc icon (16x16, exact proportions), either with the label
+	 * area painted flat magenta (#FF00FF) as a placeholder, or just a raw
+	 * vanilla-style texture with a plain near-white label (e.g. straight
+	 * off the wiki, unedited) -- see template_assets/README in the game
+	 * dir. Exact magenta pixels are replaced with the extracted dominant
+	 * colour if any are found; otherwise any near-white pixel (a raw
+	 * texture's label, not touched up) is treated as the label instead.
+	 * Everything else is copied through unchanged. Falls back to the
+	 * hand-authored TEMPLATE below if no template image has been supplied.
 	 */
-	private static final String[] TEMPLATE = {
-			"................",
-			"................",
-			"................",
-			"....BBBBB.......",
-			"..BBBDDDDDBBB...",
-			".BDDDDEDEEDDDB..",
-			"BDDEEDWWWDDEDDB.",
-			"BDEDDWWSWWDDEDB.",
-			"BDDEDDWWWDEDDDB.",
-			"BCDDDEEDEDDDDCB.",
-			".ACCCDDDDDCCCA..",
-			"..AAACCCCCAAA...",
-			"....AAAAA.......",
-			"................",
-			"................",
-			"................",
-	};
+	private static final int PLACEHOLDER_RGB = 0xFFFF00FF;
+	private static final int NEAR_WHITE_THRESHOLD = 235;
+	private static Path templateImagePath;
+	private static boolean templateLoadAttempted = false;
+	private static BufferedImage cachedTemplateImage;
+
+	public static void setTemplateImagePath(Path path) {
+		templateImagePath = path;
+		templateLoadAttempted = false;
+		cachedTemplateImage = null;
+	}
 
 	/**
-	 * Draws the shared vinyl-disc icon (see TEMPLATE) with the given label
-	 * colour and writes it to targetPng. Pixel-quantized (no antialiasing) --
-	 * a crisp, dithered look reads much better at 16x16 than a smooth
-	 * Graphics2D-drawn circle. The label area (where a real disc's own
-	 * artwork would go) is tinted to the extracted dominant colour of the
-	 * album art instead of being left a flat colour.
+	 * Draws the shared vinyl-disc icon with the given label colour and
+	 * writes it to targetPng: uses the user-supplied template image if one
+	 * has been provided (see setTemplateImagePath), otherwise falls back to
+	 * the hand-authored TEMPLATE grid.
 	 */
 	public static void render(Color labelColor, Path targetPng) {
 		try {
-			BufferedImage img = new BufferedImage(ICON_SIZE, ICON_SIZE, BufferedImage.TYPE_INT_ARGB);
+			BufferedImage img = loadTemplateImage();
 			int labelRgb = labelColor.getRGB() | 0xFF000000;
-			int spindleRgb = labelColor.darker().getRGB() | 0xFF000000;
 
-			for (int y = 0; y < ICON_SIZE; y++) {
-				String row = TEMPLATE[y];
-				for (int x = 0; x < ICON_SIZE; x++) {
-					char c = row.charAt(x);
-					int rgb = switch (c) {
-						case 'A' -> 0xFF2E2E2E;
-						case 'B' -> 0xFF707070;
-						case 'C' -> 0xFF525252;
-						case 'D' -> 0xFF8C8C8C;
-						case 'E' -> 0xFF9E9E9E;
-						case 'W' -> labelRgb;
-						case 'S' -> spindleRgb;
-						default -> 0; // '.' -- fully transparent
-					};
-					img.setRGB(x, y, rgb);
+			if (img != null) {
+				img = copyImage(img);
+				boolean hasMagenta = false;
+				for (int y = 0; y < img.getHeight() && !hasMagenta; y++) {
+					for (int x = 0; x < img.getWidth(); x++) {
+						if (img.getRGB(x, y) == PLACEHOLDER_RGB) {
+							hasMagenta = true;
+							break;
+						}
+					}
 				}
+				for (int y = 0; y < img.getHeight(); y++) {
+					for (int x = 0; x < img.getWidth(); x++) {
+						int rgb = img.getRGB(x, y);
+						boolean isLabelPixel = hasMagenta ? rgb == PLACEHOLDER_RGB : isNearWhite(rgb);
+						if (isLabelPixel) {
+							img.setRGB(x, y, labelRgb);
+						} else if (((rgb >>> 24) & 0xFF) >= 128) {
+							// Darken the disc body -- the reference texture we've been
+							// testing with is a lighter grey than vanilla's own discs,
+							// which read as much closer to black outside the label.
+							img.setRGB(x, y, darken(rgb, 0.55));
+						}
+					}
+				}
+			} else {
+				img = renderBuiltinDisc(labelColor);
 			}
 
 			Files.createDirectories(targetPng.getParent());
@@ -158,6 +162,95 @@ public class DiscIconRenderer {
 		} catch (IOException e) {
 			System.err.println("[musicdiscs] Could not write icon " + targetPng + ": " + e.getMessage());
 		}
+	}
+
+	/**
+	 * Built-in disc icon, used whenever no user-supplied template image is
+	 * present: a dark vinyl body with a few subtle groove rings and a
+	 * label circle tinted to the extracted dominant colour. Computed by
+	 * distance-from-centre rather than a hand-typed pixel grid, so it's
+	 * exactly radially symmetric by construction.
+	 */
+	private static BufferedImage renderBuiltinDisc(Color labelColor) {
+		BufferedImage img = new BufferedImage(ICON_SIZE, ICON_SIZE, BufferedImage.TYPE_INT_ARGB);
+		int labelRgb = labelColor.getRGB() | 0xFF000000;
+		int labelEdgeRgb = labelColor.darker().getRGB() | 0xFF000000;
+		double center = (ICON_SIZE - 1) / 2.0;
+		double maxDist = center + 0.5;
+
+		for (int y = 0; y < ICON_SIZE; y++) {
+			for (int x = 0; x < ICON_SIZE; x++) {
+				double dist = Math.hypot(x - center, y - center);
+				if (dist > maxDist) {
+					img.setRGB(x, y, 0);
+					continue;
+				}
+
+				double t = dist / maxDist; // 0 = centre, 1 = rim
+				int rgb;
+				if (t < 0.42) {
+					rgb = labelRgb;
+				} else if (t < 0.47) {
+					rgb = labelEdgeRgb;
+				} else if (t < 0.60) {
+					rgb = 0xFF262626;
+				} else if (t < 0.64) {
+					rgb = 0xFF3A3A3A;
+				} else if (t < 0.80) {
+					rgb = 0xFF262626;
+				} else if (t < 0.85) {
+					rgb = 0xFF3A3A3A;
+				} else {
+					rgb = 0xFF161616;
+				}
+				img.setRGB(x, y, rgb);
+			}
+		}
+
+		int mid = ICON_SIZE / 2;
+		int spindleRgb = 0xFF0D0D0D;
+		img.setRGB(mid - 1, mid - 1, spindleRgb);
+		img.setRGB(mid, mid - 1, spindleRgb);
+		img.setRGB(mid - 1, mid, spindleRgb);
+		img.setRGB(mid, mid, spindleRgb);
+		return img;
+	}
+
+	private static int darken(int argb, double factor) {
+		int a = (argb >>> 24) & 0xFF;
+		int r = (int) (((argb >> 16) & 0xFF) * factor);
+		int g = (int) (((argb >> 8) & 0xFF) * factor);
+		int b = (int) ((argb & 0xFF) * factor);
+		return (a << 24) | (r << 16) | (g << 8) | b;
+	}
+
+	private static boolean isNearWhite(int argb) {
+		if (((argb >>> 24) & 0xFF) < 128) return false; // ignore transparent/edge pixels
+		int r = (argb >> 16) & 0xFF, g = (argb >> 8) & 0xFF, b = argb & 0xFF;
+		return r >= NEAR_WHITE_THRESHOLD && g >= NEAR_WHITE_THRESHOLD && b >= NEAR_WHITE_THRESHOLD;
+	}
+
+	private static BufferedImage loadTemplateImage() {
+		if (templateLoadAttempted) return cachedTemplateImage;
+		templateLoadAttempted = true;
+		if (templateImagePath == null || !Files.isRegularFile(templateImagePath)) return null;
+		try {
+			cachedTemplateImage = ImageIO.read(templateImagePath.toFile());
+			if (cachedTemplateImage != null) {
+				System.out.println("[musicdiscs] Using disc icon template from " + templateImagePath);
+			}
+		} catch (IOException e) {
+			System.err.println("[musicdiscs] Could not read disc icon template " + templateImagePath + ": " + e.getMessage());
+		}
+		return cachedTemplateImage;
+	}
+
+	private static BufferedImage copyImage(BufferedImage src) {
+		BufferedImage copy = new BufferedImage(src.getWidth(), src.getHeight(), BufferedImage.TYPE_INT_ARGB);
+		Graphics2D g = copy.createGraphics();
+		g.drawImage(src, 0, 0, null);
+		g.dispose();
+		return copy;
 	}
 
 	private static BufferedImage step(BufferedImage src, int w, int h) {

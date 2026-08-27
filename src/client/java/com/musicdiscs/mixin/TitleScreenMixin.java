@@ -60,7 +60,7 @@ public abstract class TitleScreenMixin extends Screen {
 		this.musicdiscs$button = this.addRenderableWidget(
 				Button.builder(Component.literal(""), b -> this.minecraft.gui.setScreen(new MusicDiscsMenuScreen(this)))
 						.bounds(rightEdge + 4, rowY, 20, 20)
-						.tooltip(Tooltip.create(Component.literal("Music Discs")))
+						.tooltip(Tooltip.create(Component.literal("Needledrop")))
 						.build()
 		);
 	}
@@ -71,7 +71,13 @@ public abstract class TitleScreenMixin extends Screen {
 		int cx = this.musicdiscs$button.getX() + this.musicdiscs$button.getWidth() / 2;
 		int cy = this.musicdiscs$button.getY() + this.musicdiscs$button.getHeight() / 2 - 4;
 		String note = "♪";
-		gfx.centeredText(this.font, note, cx + 1, cy + 1, 0xFF90D5FF);
-		gfx.centeredText(this.font, note, cx, cy, 0xFFFFFFFF);
+		int halfWidth = this.font.width(note) / 2;
+		// dropShadow=false on both -- centeredText() always draws with a
+		// shadow, which is a hardcoded dark colour baked in underneath
+		// regardless of what colour we ask for, muddying the intended
+		// light-blue "shadow" note into grey. Centering manually here so we
+		// can call the no-shadow overload directly.
+		gfx.text(this.font, note, cx + 1 - halfWidth, cy + 1, 0xFF90D5FF, false);
+		gfx.text(this.font, note, cx - halfWidth, cy, 0xFFFFFFFF, false);
 	}
 }

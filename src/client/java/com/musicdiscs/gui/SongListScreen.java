@@ -191,10 +191,10 @@ public class SongListScreen extends Screen {
 	@Override
 	public void extractRenderState(GuiGraphicsExtractor gfx, int mouseX, int mouseY, float partialTick) {
 		super.extractRenderState(gfx, mouseX, mouseY, partialTick);
-		gfx.centeredText(this.font, this.title, this.width / 2, 8, 0xFFFFFF);
+		gfx.centeredText(this.font, this.title, this.width / 2, 8, 0xFFFFFFFF);
 		String status = filteredIds.size() + " songs shown, " + workingEnabled.size() + " enabled"
 				+ (filteredIds.size() > ROWS_VISIBLE ? " -- scroll for more" : "");
-		gfx.centeredText(this.font, status, this.width / 2, this.height - 46, 0xA0A0A0);
+		gfx.centeredText(this.font, status, this.width / 2, this.height - 46, 0xFFA0A0A0);
 	}
 
 	@Override

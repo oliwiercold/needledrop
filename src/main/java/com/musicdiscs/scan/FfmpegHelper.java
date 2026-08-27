@@ -116,9 +116,7 @@ public class FfmpegHelper {
 	 * cover art have that art as an attached-picture "video" stream, and
 	 * without -vn ffmpeg muxes it into the .ogg as a Theora stream alongside
 	 * the audio -- Minecraft's decoder doesn't understand that and silently
-	 * plays no sound at all (confirmed by testing: the disc worked in every
-	 * other way, correct texture/name/registry entry, just no audio, and
-	 * ffprobe showed a "theora" video stream sitting next to the vorbis one).
+	 * plays no sound at all.
 	 */
 	public boolean convertToOgg(DiscEntry entry, Path outputFile) {
 		try {

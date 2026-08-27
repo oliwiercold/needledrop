@@ -16,18 +16,10 @@ import java.nio.file.Path;
  * discs are eligible in THIS world specifically, before loot tables get
  * built.
  *
- * There used to be a second job here -- copying a generated jukebox_song
- * datapack into the world's own datapacks/ folder, since jukebox_song is a
- * datapack-loaded registry rather than something registerable in Java. That
- * approach never worked: Minecraft builds a preview of default world
- * settings (using only vanilla + built-in mod data, no per-world folder at
- * all) the moment you open "Create New World", well before any world
- * folder exists to copy into -- confirmed by testing, including trying to
- * inject earlier via a mixin on world-storage opening, which still ran too
- * late. GeneratedPackWriter now writes the jukebox_song JSON straight into
- * this mod's own resource root instead (see its class doc), which is
- * already part of every resource build including that early preview, so no
- * per-world copy is needed anymore.
+ * jukebox_song data itself is NOT handled here -- see ServerPacksSourceMixin
+ * for how the generated jukebox_song datapack (written by GeneratedPackWriter)
+ * gets merged into Minecraft's data, including the early world-creation
+ * preview that runs before any world folder (and so this class) exists.
  */
 public class ServerDatapackInjector {
 

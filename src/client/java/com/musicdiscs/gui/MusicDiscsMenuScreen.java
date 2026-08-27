@@ -16,7 +16,7 @@ public class MusicDiscsMenuScreen extends Screen {
 	private final Screen parent;
 
 	public MusicDiscsMenuScreen(Screen parent) {
-		super(Component.literal("Music Discs From Folder"));
+		super(Component.literal("Needledrop"));
 		this.parent = parent;
 	}
 
@@ -56,10 +56,10 @@ public class MusicDiscsMenuScreen extends Screen {
 	@Override
 	public void extractRenderState(GuiGraphicsExtractor gfx, int mouseX, int mouseY, float partialTick) {
 		super.extractRenderState(gfx, mouseX, mouseY, partialTick);
-		gfx.centeredText(this.font, this.title, this.width / 2, this.height / 2 - 90, 0xFFFFFF);
-		gfx.centeredText(this.font, "Folder: " + MusicDiscsMod.CONFIG.musicFolderPath, this.width / 2, this.height - 40, 0xA0A0A0);
+		gfx.centeredText(this.font, this.title, this.width / 2, this.height / 2 - 90, 0xFFFFFFFF);
+		gfx.centeredText(this.font, "Folder: " + MusicDiscsMod.CONFIG.musicFolderPath, this.width / 2, this.height - 40, 0xFFA0A0A0);
 		gfx.centeredText(this.font, "Newly added songs need a game restart before they're usable items.",
-				this.width / 2, this.height - 26, 0xFFFF55);
+				this.width / 2, this.height - 26, 0xFFFFFF55);
 	}
 
 	@Override
