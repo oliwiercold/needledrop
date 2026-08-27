@@ -90,11 +90,19 @@ exist as discs. Songs you already had don't need this.
 **Discs look wrong / have a missing-texture checkerboard.**
 This shouldn't happen — the generated resource pack enables itself. If it
 somehow got disabled, check Options > Resource Packs and make sure
-"musicdiscs_generated" is on the *Selected* side, then restart.
+"Needledrop" is on the *Selected* side, then restart.
 
 **A world I made before installing the mod doesn't seem to have loot
 discs.**
 Run `/reload` once in that world.
+
+**I explored a whole structure and never found a single disc.**
+Loot is a flat 15% chance *per eligible chest* (abandoned mineshafts, End
+city treasure, strongholds, dungeons, buried treasure) — it doesn't go up
+with a bigger library, only the *variety* does if a roll succeeds. A
+single structure often only has a handful of chests, so finding zero in
+one visit is normal bad luck, not a bug. Want better odds? Set
+`"lootChance"` higher (e.g. `0.4`) in `config/musicdiscs.json`.
 
 **ffmpeg errors in the log / "Could not run ffmpeg."**
 The mod couldn't find or run ffmpeg. Confirm `ffmpeg -version` works in a
