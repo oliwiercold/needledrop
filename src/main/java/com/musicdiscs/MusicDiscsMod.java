@@ -94,7 +94,6 @@ public class MusicDiscsMod implements ModInitializer {
 		Path iconCacheDir = cacheDir.resolve("icons");
 		Path resourcePackDir = gameDir.resolve("resourcepacks").resolve("musicdiscs_generated");
 		Path datapackTemplateDir = cacheDir.resolve("datapack_template");
-		DiscIconRenderer.setTemplateImagePath(gameDir.resolve("template_assets").resolve("disc_template.png"));
 
 		Set<String> extensions = Set.of(config.extensions);
 		List<DiscEntry> entries = MusicScanner.scan(Path.of(config.musicFolderPath), extensions, config.maxDiscs);
