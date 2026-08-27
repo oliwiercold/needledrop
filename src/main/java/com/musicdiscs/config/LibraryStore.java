@@ -26,6 +26,7 @@ public class LibraryStore {
 	public static class Info {
 		public String title;
 		public String artist;
+		public double lengthSeconds;
 		public boolean enabledGlobally = true;
 	}
 
@@ -73,10 +74,17 @@ public class LibraryStore {
 	 */
 	public void mergeScanResults(List<DiscEntry> entries) {
 		for (DiscEntry e : entries) {
-			songs.computeIfAbsent(e.songId(), id -> new Info()).title = e.title;
-			songs.get(e.songId()).artist = e.artist;
+			Info info = songs.computeIfAbsent(e.songId(), id -> new Info());
+			info.title = e.title;
+			info.artist = e.artist;
+			info.lengthSeconds = e.lengthSeconds;
 		}
 		save();
+	}
+
+	/** The cached metadata for a song, or null if it's never been scanned before. */
+	public Info get(String songId) {
+		return songs.get(songId);
 	}
 
 	public boolean isEnabled(String songId) {

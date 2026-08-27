@@ -104,10 +104,28 @@ public class MusicDiscsMod implements ModInitializer {
 		int total = Math.max(1, entries.size());
 		while (it.hasNext()) {
 			DiscEntry entry = it.next();
-			ffmpeg.readMetadata(entry);
 
 			Path oggOut = oggCacheDir.resolve(entry.songId() + ".ogg");
-			if (!Files.exists(oggOut)) {
+			Path iconOut = iconCacheDir.resolve(entry.itemId() + ".png");
+			boolean oggCached = Files.exists(oggOut);
+			boolean iconCached = Files.exists(iconOut);
+
+			// ffprobe is a real subprocess spawn per file; with a large library,
+			// running it for every song on every single boot (even when nothing
+			// changed since last time) dominates startup time. Once a song is
+			// fully converted, its metadata is already sitting in LibraryStore
+			// from the run that converted it, so reuse that instead of asking
+			// ffprobe again.
+			LibraryStore.Info cached = library.get(entry.songId());
+			if (oggCached && iconCached && cached != null && cached.lengthSeconds > 0) {
+				entry.title = cached.title;
+				entry.artist = cached.artist;
+				entry.lengthSeconds = cached.lengthSeconds;
+			} else {
+				ffmpeg.readMetadata(entry);
+			}
+
+			if (!oggCached) {
 				if (!ffmpeg.convertToOgg(entry, oggOut)) {
 					it.remove();
 					done++;
@@ -117,8 +135,7 @@ public class MusicDiscsMod implements ModInitializer {
 			}
 			entry.convertedOgg = oggOut;
 
-			Path iconOut = iconCacheDir.resolve(entry.itemId() + ".png");
-			if (!Files.exists(iconOut)) {
+			if (!iconCached) {
 				Path rawCover = ffmpeg.extractCoverArt(entry, cacheDir.resolve("raw_covers"));
 				Color color = rawCover != null ? DiscIconRenderer.extractDominantColor(rawCover) : null;
 				if (color == null) {
