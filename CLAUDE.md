@@ -276,6 +276,43 @@ chronological, since later fixes sometimes build on earlier ones.
     out of a large library at that stage) rather than measured in-game —
     **treat these as a first pass and expect the user to ask for further
     tuning once they've actually played with it.**
+12. **AI-tell writing style swept out of code comments and README.** The
+    house style up to this point leaned hard on " -- " as an em-dash
+    substitute and fairly formal doc-comment phrasing (a habit carried
+    over from how this project's assistant writes by default). The user
+    asked for that removed from anything a human might read: comments,
+    doc comments, user-facing strings, and prose docs, so it doesn't read
+    as obviously AI-written. Done via a batch of parallel agents each
+    covering a slice of the source tree, then a manual pass on a few
+    stragglers. This file (CLAUDE.md) was deliberately left out of that
+    pass: it's read by a future Claude session, not by someone judging
+    whether a human wrote it, so sanitizing its style doesn't serve the
+    actual goal. If you're adding new comments here or in the code,
+    there's no hard rule against dashes, just be aware the user notices
+    and cares about this in anything public-facing.
+13. **Jukebox block itself retextured, bundled in the mod.** The user
+    wanted the jukebox to look like a vinyl record player, matching a
+    third-party resource pack they'd found ("record-player.zip"). That
+    pack turned out to be a specific, identifiable community creation
+    (old pack_format 55, jukebox_arm/buttons/cover/record textures, a
+    Hungarian lang file) with no license info, not something safe to
+    redistribute bundled inside this mod. Declined to bundle it; built an
+    original replacement instead, as a placeholder until the user hears
+    back from that pack's author about permission. Vanilla's actual 26.2
+    jukebox model is a plain `cube_top` (just `top` and `side` textures,
+    no extra geometry, confirmed by reading the decompiled model JSON and
+    checking the client jar for any jukebox-specific renderer class:
+    there isn't one), so the whole "record player" look comes from
+    texture painting alone: a vinyl-record top face (reusing the same
+    label/groove-ring logic as `DiscIconRenderer`, plus a painted tonearm)
+    and a plank-with-control-buttons side face. Bundled at
+    `assets/minecraft/textures/block/jukebox_{top,side}.png` in the mod's
+    own resources, the same override mechanism as the vanilla disc
+    textures (point 10). Generated with a disposable standalone Java
+    program (compiled and run directly, not part of the mod), iterated by
+    reading the output PNGs back as images rather than guessing blind. If
+    the user later gets permission to use the original third-party pack,
+    or wants something different, this can just be swapped out.
 
 ## Known open items (not yet done, worth revisiting)
 
