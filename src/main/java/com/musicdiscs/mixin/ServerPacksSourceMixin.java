@@ -16,13 +16,13 @@ import java.nio.file.Path;
 /**
  * jukebox_song is a datapack-loaded registry, not something registerable
  * directly in Java. This adds our generated jukebox_song data as an extra
- * source merged into Minecraft's "vanilla" data -- the same set used for
- * the early world-creation preview (built before any world folder exists,
- * from vanilla + built-in mod data only) and every actual world afterward.
+ * source merged into Minecraft's "vanilla" data: the same set used for the
+ * early world-creation preview (built before any world folder exists, from
+ * vanilla + built-in mod data only) and every actual world afterward.
  *
  * The data lives in an external folder under the game directory (not the
- * mod's own jar/resources), so this works the same way whether the mod
- * runs from Gradle or as an installed jar -- a real jar can't be written
+ * mod's own jar/resources), so this works the same whether the mod runs
+ * from Gradle or as an installed jar, since a real jar can't be written
  * into at runtime.
  */
 @Mixin(ServerPacksSource.class)
@@ -37,7 +37,7 @@ public class ServerPacksSourceMixin {
 	)
 	private static VanillaPackResources musicdiscs$addGeneratedData(VanillaPackResourcesBuilder builder, PackLocationInfo info) {
 		// pushAssetPath wants the path to the "data" folder itself, not the
-		// pack root containing pack.mcmeta -- confirmed by reading
+		// pack root containing pack.mcmeta. Confirmed by reading
 		// VanillaPackResourcesBuilder's own pushJarResources(), which passes
 		// the resolved data/assets directory directly, never its parent.
 		Path dataDir = FabricLoader.getInstance().getGameDir()
@@ -46,12 +46,12 @@ public class ServerPacksSourceMixin {
 			builder.pushAssetPath(PackType.SERVER_DATA, dataDir);
 			// createVanillaPackSource() calls exposeNamespace("minecraft") before
 			// this redirect runs, and VanillaPackResources.getNamespaces() just
-			// returns that fixed set verbatim -- it's not derived from what's
+			// returns that fixed set verbatim; it's not derived from what's
 			// actually on disk. The registry loader (for jukebox_song and every
 			// other dynamic registry) asks getNamespaces() which namespaces to
-			// even look under, so without this, our data sits in the pushed
-			// path but is never discovered: getResource() would happily find it
-			// by exact id, but nothing ever asks for that id in the first place.
+			// look under, so without this our data sits in the pushed path but
+			// is never discovered: getResource() would find it by exact id, but
+			// nothing ever asks for that id in the first place.
 			builder.exposeNamespace("musicdiscs");
 		}
 		return builder.build(info);

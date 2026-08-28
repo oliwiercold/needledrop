@@ -26,7 +26,7 @@ public class ModConfig {
 	public String ffmpegPath = "ffmpeg";
 
 	/**
-	 * NOT a real "how many discs you're allowed" limit -- there isn't one.
+	 * NOT a real "how many discs you're allowed" limit: there isn't one.
 	 * This is purely a runaway-scan safety valve (e.g. in case musicFolderPath
 	 * accidentally points at your whole hard drive). Leave it huge.
 	 */
@@ -34,11 +34,10 @@ public class ModConfig {
 
 	/**
 	 * Chance (0.0-1.0) that a hooked loot chest rolls a bonus disc, split by
-	 * dimension. Nether and End structures default higher -- their chests
+	 * dimension. Nether and End structures default higher: their chests
 	 * tend to be faster to reach once you're geared for that stage (bastions/
 	 * fortresses, elytra + end cities), so a flat chance would make
-	 * disc-finding feel like it dries up in the late game instead of staying
-	 * worthwhile.
+	 * disc-finding dry up in the late game instead of staying worthwhile.
 	 */
 	public double lootChanceOverworld = 0.35;
 	public double lootChanceNether = 0.5;

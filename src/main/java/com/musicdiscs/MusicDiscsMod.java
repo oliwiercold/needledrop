@@ -35,10 +35,10 @@ public class MusicDiscsMod implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		// Must happen before ANYTHING else touches AWT, including indirectly --
-		// java.awt.headless is read once by GraphicsEnvironment and then cached
+		// Must happen before anything else touches AWT, even indirectly:
+		// java.awt.headless is read once by GraphicsEnvironment and cached
 		// forever, and Minecraft's own asset-loading workers use ImageIO (and
-		// so AWT) very early. Mod init is the earliest hook available, before
+		// so AWT) very early. Mod init is the earliest hook we get, before
 		// Minecraft itself exists.
 		System.setProperty("java.awt.headless", "false");
 
@@ -51,7 +51,7 @@ public class MusicDiscsMod implements ModInitializer {
 		// real dedicated server there is no "your Music folder" to speak of, so
 		// we just skip scanning there and the mod does nothing extra.
 		if (FabricLoader.getInstance().getEnvironmentType() != EnvType.CLIENT) {
-			System.out.println("[musicdiscs] Running on a dedicated server -- skipping local music scan.");
+			System.out.println("[musicdiscs] Running on a dedicated server, skipping local music scan.");
 			return;
 		}
 
@@ -67,17 +67,16 @@ public class MusicDiscsMod implements ModInitializer {
 	}
 
 	/**
-	 * The actual scan -> ffprobe -> ffmpeg convert -> icon render -> write
-	 * generated pack pipeline, split out from onInitialize() so the in-game
-	 * "Rescan" button can call it too. Safe to call repeatedly (skips
-	 * already-converted files by checking the cache).
+	 * Scan -> ffprobe -> ffmpeg convert -> icon render -> write generated
+	 * pack pipeline, split out from onInitialize() so the in-game "Rescan"
+	 * button can call it too. Safe to call repeatedly (skips already-converted
+	 * files via the cache).
 	 *
-	 * IMPORTANT LIMITATION: calling this again after boot updates the
-	 * generated resource pack / datapack files and LibraryStore on disk, but
-	 * Minecraft freezes item registries after startup -- so a song that's
-	 * brand new since the last restart will show up in the "Edit Library"
-	 * list, but won't actually be a usable item until you relaunch. Songs
-	 * that were already known keep working immediately.
+	 * Calling this again after boot updates the generated resource pack /
+	 * datapack files and LibraryStore on disk, but Minecraft freezes item
+	 * registries after startup, so a song that's brand new since the last
+	 * restart shows up in "Edit Library" but isn't a usable item until you
+	 * relaunch. Already-known songs keep working immediately.
 	 */
 	public static List<DiscEntry> runScanAndConvert(ModConfig config, LibraryStore library, IntConsumer progressPercent) {
 		FfmpegHelper ffmpeg = new FfmpegHelper(config.ffmpegPath);
@@ -96,12 +95,11 @@ public class MusicDiscsMod implements ModInitializer {
 		Path datapackTemplateDir = cacheDir.resolve("datapack_template");
 
 		// One-time migration: earlier versions wrote the generated pack to a
-		// folder named "musicdiscs_generated" (an internal id, not meant to
-		// be seen -- Minecraft shows a folder pack's name as its literal
-		// folder name). Renamed to "Needledrop" so the Resource Packs screen
-		// reads nicely; deleting the old one here avoids leaving a stale
-		// duplicate pack sitting next to the new one after an upgrade. It's
-		// entirely regenerated content, so removing it is always safe.
+		// folder named "musicdiscs_generated" (an internal id; Minecraft shows
+		// a folder pack's name as its literal folder name). Renamed to
+		// "Needledrop" so the Resource Packs screen reads nicely, and this
+		// deletes the old folder so upgrades don't leave a stale duplicate
+		// pack behind. Fully regenerated content, so removing it is always safe.
 		deleteRecursively(gameDir.resolve("resourcepacks").resolve("musicdiscs_generated"));
 
 		Set<String> extensions = Set.of(config.extensions);
@@ -181,11 +179,11 @@ public class MusicDiscsMod implements ModInitializer {
 				try {
 					Files.delete(p);
 				} catch (java.io.IOException ignored) {
-					// Leftover file we couldn't remove -- harmless, not worth failing boot over.
+					// Leftover file we couldn't remove. Harmless, not worth failing boot over.
 				}
 			});
 		} catch (java.io.IOException ignored) {
-			// Couldn't even walk it -- leave it alone.
+			// Couldn't even walk it. Leave it alone.
 		}
 	}
 

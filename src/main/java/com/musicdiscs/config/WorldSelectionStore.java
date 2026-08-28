@@ -17,7 +17,7 @@ import java.util.Set;
  *
  * `customized = false` (the default, and the state for any world that's
  * never been opened in the "Edit Per-World Discs" screen) means "just use
- * whatever's globally enabled in LibraryStore" -- so a brand new world
+ * whatever's globally enabled in LibraryStore", so a brand new world
  * automatically gets your whole enabled library with zero extra steps.
  */
 public class WorldSelectionStore {

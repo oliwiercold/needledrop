@@ -18,21 +18,20 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Registers a plain Item per disc, with the "jukebox_playable" component set
- * as a DEFAULT on the item itself -- so it plays its song straight out of
- * the creative inventory, a /give command, or loot, the same way vanilla's
- * own discs work.
+ * Registers a plain Item per disc, with the "jukebox_playable" component
+ * set as a default on the item itself, so it plays its song straight out
+ * of the creative inventory, a /give command, or loot, same as vanilla's
+ * own discs.
  *
- * Registers one item per EVERY scanned song, regardless of enabled/disabled
- * state -- enable/disable (global or per-world) only controls whether
- * LootHooks offers it as loot, not whether the item exists. That keeps
- * registration (which can't change without a restart) separate from
- * selection (which can change anytime).
+ * Registers one item per every scanned song regardless of enabled/disabled
+ * state: enable/disable (global or per-world) only controls whether
+ * LootHooks offers it as loot, not whether the item exists. Keeps
+ * registration (fixed at restart) separate from selection (changes anytime).
  *
- * `.jukeboxPlayable(songKey)` needs a REAL jukebox_song registry entry, not
+ * `.jukeboxPlayable(songKey)` needs a real jukebox_song registry entry, not
  * just a Holder with the right data: actual jukebox playback resolves the
  * sound to play via registry.getId(song), which is identity-based and only
- * returns a real id for objects that are genuinely in the registry. See
+ * returns an id for objects actually in the registry. See
  * ServerPacksSourceMixin for how the generated jukebox_song data reaches
  * that registry.
  */
@@ -67,7 +66,7 @@ public class ModItems {
 		});
 	}
 
-	/** itemId ("disc_xxxx") -> songId ("song_xxxx"), the reverse of what REGISTERED gives you -- LootHooks needs this to check enabled state. */
+	/** itemId ("disc_xxxx") -> songId ("song_xxxx"), the reverse of what REGISTERED gives you. LootHooks needs this to check enabled state. */
 	public static String songIdForItemId(String itemId) {
 		return "song_" + itemId.substring("disc_".length());
 	}

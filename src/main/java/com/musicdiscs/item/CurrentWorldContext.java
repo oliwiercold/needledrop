@@ -5,14 +5,14 @@ import java.util.Set;
 
 /**
  * Holds "which songIds are loot-eligible in the world that's currently
- * starting up", so LootHooks can filter by it. Populated by
+ * starting up" so LootHooks can filter by it. Populated by
  * ServerDatapackInjector's SERVER_STARTING hook, which runs (and so
- * populates this) before loot tables get (re)built for that world.
+ * populates this) before loot tables get built for that world.
  *
- * KNOWN ROUGH EDGE: if this ordering assumption is wrong on your version --
- * i.e. loot for a freshly-loaded world doesn't reflect your per-world
- * selection -- running `/reload` once after the world's up will definitely
- * pick up the correct set, since by then SERVER_STARTING has already run.
+ * If that ordering assumption breaks on your version (loot for a
+ * freshly-loaded world doesn't reflect the per-world selection), run
+ * `/reload` once: SERVER_STARTING will have already run by then and the
+ * reload picks up the right set.
  */
 public class CurrentWorldContext {
 

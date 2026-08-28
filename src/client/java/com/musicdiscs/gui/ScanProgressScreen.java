@@ -12,18 +12,18 @@ import java.util.List;
  * Shown while runScanAndConvert() does its work on a background thread (it
  * shells out to ffmpeg per file, which is too slow to run on the render
  * thread without freezing the game). `progress`/`done`/`result` are read on
- * the render thread and written from the background thread -- kept as plain
- * volatiles rather than routed through Minecraft#execute since they're
- * simple reads, not GUI mutations; only the actual screen swap at the end
- * needs to happen on the main thread, via tick().
+ * the render thread and written from the background thread: plain volatiles
+ * rather than routed through Minecraft#execute since they're simple reads,
+ * not GUI mutations. Only the actual screen swap at the end needs to happen
+ * on the main thread, via tick().
  */
 public class ScanProgressScreen extends Screen {
 
 	/**
 	 * Rescanning an already-fully-cached library (nothing new to convert)
-	 * finishes in well under a second -- without a floor, the screen would
-	 * flash and vanish before it's even readable. This just makes sure
-	 * "Done!" stays up long enough to actually see.
+	 * finishes in well under a second. Without a floor the screen would
+	 * flash and vanish before it's even readable, so this keeps "Done!"
+	 * up long enough to actually see.
 	 */
 	private static final long MIN_VISIBLE_MILLIS = 1200;
 
@@ -70,10 +70,10 @@ public class ScanProgressScreen extends Screen {
 			gfx.centeredText(this.font, "Scanning & converting... " + progress + "%",
 					this.width / 2, this.height / 2 - 10, 0xFFFFFFFF);
 		}
-		gfx.centeredText(this.font, "Big libraries take a while -- ffmpeg is doing real work per file.",
+		gfx.centeredText(this.font, "Big libraries take a while: ffmpeg is doing real work per file.",
 				this.width / 2, this.height / 2 + 10, 0xFFA0A0A0);
 		if (MusicDiscsMod.itemsAlreadyRegistered()) {
-			gfx.centeredText(this.font, "Note: brand new songs need a relaunch before they're usable items.",
+			gfx.centeredText(this.font, "Brand new songs need a relaunch before they're usable items.",
 					this.width / 2, this.height / 2 + 26, 0xFF808080);
 		}
 	}

@@ -16,8 +16,8 @@ import java.util.Map;
 
 /**
  * Persists which songs are known and whether each is globally enabled
- * (i.e. eligible to show up in loot at all, in any world that doesn't
- * override it -- see WorldSelectionStore). Lives at
+ * (i.e. eligible to show up in loot in any world that doesn't override it).
+ * See WorldSelectionStore for per-world overrides. Lives at
  * .minecraft/config/musicdiscs_library.json so the in-game "Edit Library"
  * screen has something to show even before you press Rescan again.
  */
@@ -69,7 +69,7 @@ public class LibraryStore {
 	 * Folds freshly-scanned entries into the store: new songs are added
 	 * (enabled by default), songs we already knew about keep whatever
 	 * enabled/disabled flag was already saved for them. Doesn't remove
-	 * entries for songs that vanished from the folder -- they just stay
+	 * entries for songs that vanished from the folder. They just stay
 	 * listed (and harmless) until you clean them up by hand in the UI.
 	 */
 	public void mergeScanResults(List<DiscEntry> entries) {

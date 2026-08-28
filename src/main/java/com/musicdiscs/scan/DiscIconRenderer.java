@@ -10,13 +10,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
- * Replaces the old "shrink the whole cover to 16x16" approach. Instead:
+ * Replaces the old "shrink the whole cover to 16x16" approach. Instead,
  * every disc uses the SAME procedurally-drawn vinyl icon (dark body, groove
- * rings, spindle hole), and only the label circle in the middle is tinted --
- * to the album cover's most visually dominant colour, if we found one, or a
+ * rings, spindle hole), and only the label circle in the middle is tinted to
+ * the album cover's most visually dominant colour, if we found one, or a
  * neutral grey otherwise. Reads cleaner at 16x16 than a full mosaic does,
- * and gives your disc shelf a consistent "look" while still being colour-
- * coded per song.
+ * and gives your disc shelf a consistent look while still being colour-coded
+ * per song.
  */
 public class DiscIconRenderer {
 
@@ -25,7 +25,7 @@ public class DiscIconRenderer {
 	/**
 	 * Buckets the image's pixels into a coarse colour grid and returns the
 	 * centre of whichever bucket scored highest, weighted toward saturated,
-	 * mid-brightness colours -- a flat pixel average tends to collapse
+	 * mid-brightness colours. A flat pixel average tends to collapse
 	 * everything to muddy grey/brown, which this avoids.
 	 */
 	public static Color extractDominantColor(Path sourceImage) {
@@ -33,7 +33,7 @@ public class DiscIconRenderer {
 			BufferedImage img = ImageIO.read(sourceImage.toFile());
 			if (img == null) return null;
 
-			// Downscale first purely for speed -- doesn't need to be exact.
+			// Downscale first purely for speed, doesn't need to be exact.
 			BufferedImage sample = step(img, 64, 64);
 
 			final int BUCKETS_PER_CHANNEL = 8; // 8x8x8 = 512 buckets
@@ -53,7 +53,7 @@ public class DiscIconRenderer {
 					float[] hsb = Color.RGBtoHSB(r, g, b, null);
 					float sat = hsb[1], bri = hsb[2];
 
-					// Prefer saturated, not-too-dark, not-too-bright pixels -- de-prioritises
+					// Prefer saturated, not-too-dark, not-too-bright pixels. De-prioritises
 					// black bars, white backgrounds and pure greys without excluding them outright.
 					double weight = 0.15 + sat * (1.0 - Math.abs(bri - 0.6));
 
@@ -97,11 +97,11 @@ public class DiscIconRenderer {
 	/**
 	 * Draws the shared vinyl-disc icon with the given label colour and
 	 * writes it to targetPng. Entirely our own procedural drawing (see
-	 * renderBuiltinDisc below) -- there used to be an optional path here
-	 * that based the icon on a user-supplied texture extracted from the
-	 * game's own files, but that meant shipping (or asking users to supply)
-	 * a Mojang-derived asset. Not worth the exposure when the fully
-	 * procedural version looks fine on its own, so that path is gone.
+	 * renderBuiltinDisc below). There used to be a path that based the icon
+	 * on a user-supplied texture extracted from the game's own files, but
+	 * that meant shipping (or asking users to supply) a Mojang-derived
+	 * asset. Not worth it when the procedural version looks fine on its
+	 * own, so that path is gone.
 	 */
 	public static void render(Color labelColor, Path targetPng) {
 		try {

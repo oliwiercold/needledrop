@@ -28,7 +28,7 @@ public class DiscEntry {
 		this.artist = "Unknown";
 	}
 
-	/** e.g. "song_a1b2c3d4" -- used as the jukebox_song registry id (namespaced as musicdiscs:song_a1b2c3d4). */
+	/** e.g. "song_a1b2c3d4", used as the jukebox_song registry id (namespaced as musicdiscs:song_a1b2c3d4). */
 	public String songId() {
 		return "song_" + id;
 	}

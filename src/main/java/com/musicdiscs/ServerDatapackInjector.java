@@ -9,17 +9,17 @@ import net.minecraft.world.level.storage.LevelResource;
 import java.nio.file.Path;
 
 /**
- * On every server start (fires for the integrated singleplayer server too,
- * which is what "Open to LAN" and normal singleplayer both use): load a
- * world's musicdiscs_selection.json (if any) and push the resolved
+ * Runs on every server start (including the integrated server behind
+ * singleplayer and "Open to LAN"): loads a world's
+ * musicdiscs_selection.json (if any) and pushes the resolved
  * enabled-song-id set into CurrentWorldContext, so LootHooks knows which
- * discs are eligible in THIS world specifically, before loot tables get
- * built.
+ * discs are eligible in this world before loot tables get built.
  *
- * jukebox_song data itself is NOT handled here -- see ServerPacksSourceMixin
- * for how the generated jukebox_song datapack (written by GeneratedPackWriter)
- * gets merged into Minecraft's data, including the early world-creation
- * preview that runs before any world folder (and so this class) exists.
+ * jukebox_song data is handled separately, in ServerPacksSourceMixin,
+ * which merges the generated jukebox_song datapack (written by
+ * GeneratedPackWriter) into Minecraft's data, including the early
+ * world-creation preview that runs before any world folder (and so this
+ * class) exists.
  */
 public class ServerDatapackInjector {
 

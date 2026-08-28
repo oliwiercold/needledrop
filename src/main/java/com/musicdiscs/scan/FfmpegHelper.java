@@ -24,7 +24,7 @@ public class FfmpegHelper {
 
 	public FfmpegHelper(String ffmpegPath) {
 		this.ffmpegPath = ffmpegPath;
-		// Assume ffprobe sits next to ffmpeg with the matching name -- true for
+		// Assume ffprobe sits next to ffmpeg with the matching name. True for
 		// every normal ffmpeg distribution (the official builds, choco, apt, brew...).
 		if (ffmpegPath.toLowerCase(Locale.ROOT).contains("ffmpeg")) {
 			this.ffprobePath = ffmpegPath.toLowerCase(Locale.ROOT).replace("ffmpeg", "ffprobe");
@@ -105,7 +105,7 @@ public class FfmpegHelper {
 				return out;
 			}
 		} catch (Exception e) {
-			// No embedded art, or ffmpeg didn't like this file -- that's fine, we fall back to a neutral colour.
+			// No embedded art, or ffmpeg didn't like this file. Fine, we fall back to a neutral colour.
 		}
 		return null;
 	}
@@ -115,7 +115,7 @@ public class FfmpegHelper {
 	 * expects. `-vn` is required, not cosmetic: source files with embedded
 	 * cover art have that art as an attached-picture "video" stream, and
 	 * without -vn ffmpeg muxes it into the .ogg as a Theora stream alongside
-	 * the audio -- Minecraft's decoder doesn't understand that and silently
+	 * the audio. Minecraft's decoder doesn't understand that and silently
 	 * plays no sound at all.
 	 */
 	public boolean convertToOgg(DiscEntry entry, Path outputFile) {

@@ -17,23 +17,23 @@ import java.util.List;
  * Turns the list of scanned/converted DiscEntry objects into:
  *
  *  1. A real resource pack under <gameDir>/resourcepacks/Needledrop/
- *     (sounds, item icons, item models, lang) -- shows up under
+ *     (sounds, item icons, item models, lang), which shows up under
  *     Options > Resource Packs; MusicDiscsClientMod auto-enables it. The
  *     folder name is also literally what shows as the pack's title in that
  *     screen (Minecraft derives it from the folder name, not pack.mcmeta),
- *     so it's picked deliberately rather than left as an internal id.
+ *     so it's picked with that in mind rather than left as an internal id.
  *
  *  2. jukebox_song datapack entries, written to an external folder
  *     (<gameDir>/musicdiscs_cache/datapack_template/) that
  *     ServerPacksSourceMixin merges into Minecraft's "vanilla" data. That
  *     data is present for every resource build, including the early
  *     world-creation preview (built before any world folder exists, from
- *     vanilla + built-in mod data only) -- see ServerPacksSourceMixin for
+ *     vanilla + built-in mod data only); see ServerPacksSourceMixin for
  *     details.
  *
  * Both are namespaced under "musicdiscs" and safe to regenerate on every
- * launch/rescan -- we just overwrite them. Includes ALL scanned songs
- * regardless of enabled/disabled state -- enable/disable only affects which
+ * launch/rescan, we just overwrite them. Includes ALL scanned songs
+ * regardless of enabled/disabled state: enable/disable only affects which
  * ones LootHooks offers as loot (see CurrentWorldContext), not whether the
  * asset/data exists.
  */
@@ -57,7 +57,7 @@ public class GeneratedPackWriter {
 
 		JsonObject pack = new JsonObject();
 		JsonObject packInner = new JsonObject();
-		packInner.addProperty("description", "Disc icons, sounds & names for Needledrop -- auto-generated, safe to delete");
+		packInner.addProperty("description", "Disc icons, sounds & names for Needledrop (auto-generated, safe to delete)");
 		int resourceFormat = currentPackFormatMajor(PackType.CLIENT_RESOURCES);
 		packInner.addProperty("min_format", resourceFormat);
 		packInner.addProperty("max_format", resourceFormat);
@@ -116,8 +116,8 @@ public class GeneratedPackWriter {
 			itemDef.add("model", modelRef);
 			writeJson(itemsDir.resolve(e.itemId() + ".json"), itemDef);
 
-			// Generic name, matching vanilla discs -- the specific song shows as its
-			// own tooltip line underneath, added automatically by the jukebox_playable
+			// Generic name, matching vanilla discs. The specific song shows as its own
+			// tooltip line underneath, added automatically by the jukebox_playable
 			// component from the JukeboxSong's own description (see writeJukeboxSongData).
 			langJson.addProperty("item." + NAMESPACE + "." + e.itemId(), "Music Disc");
 		}
@@ -143,14 +143,14 @@ public class GeneratedPackWriter {
 	}
 
 	/**
-	 * 26.2 introduced major.minor pack formats; once the major exceeds
-	 * PackFormat.lastPreMinorVersion(type) (64 for resources, 81 for data --
-	 * we're at 88/107), the schema requires "min_format"/"max_format" rather
-	 * than a bare "pack_format" + "supported_formats" pair (see
+	 * 26.2 introduced major.minor pack formats. Once the major exceeds
+	 * PackFormat.lastPreMinorVersion(type) (64 for resources, 81 for data,
+	 * we're at 88/107), the schema wants "min_format"/"max_format" instead of
+	 * a bare "pack_format" + "supported_formats" pair (see
 	 * PackFormat.IntermediaryFormat.validate in Minecraft's own source).
-	 * Using min==max==the currently-running major keeps this correct across
-	 * Minecraft updates with no hardcoded number to maintain, since we
-	 * regenerate the pack fresh every launch/rescan anyway.
+	 * min==max==the currently-running major stays correct across Minecraft
+	 * updates with no hardcoded number to maintain, since we regenerate the
+	 * pack fresh every launch/rescan anyway.
 	 */
 	private static int currentPackFormatMajor(PackType type) {
 		return SharedConstants.getCurrentVersion().packVersion(type).major();

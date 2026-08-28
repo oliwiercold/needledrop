@@ -17,10 +17,10 @@ import java.util.Map;
  * Adds a bonus loot pool to a handful of vanilla chest loot tables, gated
  * by a per-dimension chance from ModConfig (see there for why Nether/End
  * default higher than Overworld). The pool has one roll and one entry per
- * CURRENTLY ELIGIBLE disc (see CurrentWorldContext) with equal weight, so
- * on a successful roll you get exactly one random disc from whatever
- * subset is active in this world -- adding more enabled songs makes the
- * loot more varied, not more common.
+ * currently-eligible disc (see CurrentWorldContext) with equal weight, so
+ * a successful roll gives exactly one random disc from whatever subset is
+ * active in this world: more enabled songs means more variety, not more
+ * frequent drops.
  */
 public class LootHooks {
 

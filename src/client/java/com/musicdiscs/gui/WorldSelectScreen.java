@@ -13,17 +13,16 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Lists your existing saves (just the folder names under .minecraft/saves --
+ * Lists your existing saves (just the folder names under .minecraft/saves,
  * doesn't use LevelStorageSource, so it also doesn't know about display
  * names/icons the way the vanilla world list does, only raw folder names).
  * Picking one opens SongListScreen scoped to that save's own selection
  * file, so you can revisit and change it anytime, not just at world
  * creation.
  *
- * Known simplification: no scrolling here -- past roughly a dozen saves the
- * list just stops adding buttons rather than overflowing off-screen. Worth
- * upgrading to the same manual-scroll approach as SongListScreen if you
- * have a lot of worlds.
+ * No scrolling here: past roughly a dozen saves the list just stops adding
+ * buttons rather than overflowing off-screen. Could use the same
+ * manual-scroll approach as SongListScreen if someone has a lot of worlds.
  */
 public class WorldSelectScreen extends Screen {
 
@@ -63,7 +62,7 @@ public class WorldSelectScreen extends Screen {
 		super.extractRenderState(gfx, mouseX, mouseY, partialTick);
 		gfx.centeredText(this.font, this.title, this.width / 2, 8, 0xFFFFFFFF);
 		if (saves.isEmpty()) {
-			gfx.centeredText(this.font, "No saves found yet -- create a world first.", this.width / 2, this.height / 2, 0xFFA0A0A0);
+			gfx.centeredText(this.font, "No saves found yet. Create a world first.", this.width / 2, this.height / 2, 0xFFA0A0A0);
 		}
 	}
 

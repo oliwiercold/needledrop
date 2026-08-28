@@ -16,8 +16,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * Adds the "Music Discs" button to the title screen, right after the
- * "Singleplayer" button (same row -- and after any other button already
- * sharing that row, e.g. the dev-only "TW" test-world button, so we never
+ * "Singleplayer" button (same row, after any other button already sharing
+ * that row too, e.g. the dev-only "TW" test-world button, so we never
  * overlap it). Found by matching the resolved button label text rather than
  * hardcoding vanilla's internal layout math, which shifts release to
  * release.
@@ -47,7 +47,7 @@ public abstract class TitleScreenMixin extends Screen {
 				break;
 			}
 		}
-		if (singleplayerButton == null) return; // demo mode etc. has no such button -- just skip
+		if (singleplayerButton == null) return; // demo mode etc. has no such button, just skip
 
 		int rowY = singleplayerButton.getY();
 		int rightEdge = singleplayerButton.getX() + singleplayerButton.getWidth();
@@ -72,11 +72,11 @@ public abstract class TitleScreenMixin extends Screen {
 		int cy = this.musicdiscs$button.getY() + this.musicdiscs$button.getHeight() / 2 - 4;
 		String note = "♪";
 		int halfWidth = this.font.width(note) / 2;
-		// dropShadow=false on both -- centeredText() always draws with a
-		// shadow, which is a hardcoded dark colour baked in underneath
-		// regardless of what colour we ask for, muddying the intended
-		// light-blue "shadow" note into grey. Centering manually here so we
-		// can call the no-shadow overload directly.
+		// dropShadow=false on both: centeredText() always draws with a
+		// shadow, a hardcoded dark colour baked in underneath regardless of
+		// what colour we ask for, which muddies the intended light-blue
+		// "shadow" note into grey. Centering manually here so we can call
+		// the no-shadow overload directly.
 		gfx.text(this.font, note, cx + 1 - halfWidth, cy + 1, 0xFF90D5FF, false);
 		gfx.text(this.font, note, cx - halfWidth, cy, 0xFFFFFFFF, false);
 	}

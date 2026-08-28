@@ -22,41 +22,18 @@ import java.util.Set;
  * worldSaveDir is null) and "Edit Per-World Discs" (one save's override,
  * when worldSaveDir points at that save's folder).
  *
- * HIGHEST-RISK FILE IN THE WHOLE PROJECT. Two spots to watch if this
- * doesn't compile:
- *
- *  1. Checkbox.builder(...) -- I'm not 100% certain 26.2 uses a builder here
- *     the way Button does. If it doesn't exist, fall back to the older
- *     direct constructor:
- *       new Checkbox(x, y, 200, 20, Component.literal(label), selected) {
- *           @Override public void onPress() {
- *               super.onPress();
- *               if (this.selected()) workingEnabled.add(songId); else workingEnabled.remove(songId);
- *           }
- *       }
- *     (exact Checkbox constructor param order/names may still need a small
- *     tweak either way -- check whatever IntelliJ's autocomplete offers).
- *
- *  2. `this.removeWidget(...)` below (used to swap just the checkbox rows
- *     out) is a real Screen method as far as I know, but if it's missing or
- *     named differently on 26.2, the fallback is `this.clearWidgets()` +
- *     rebuilding EVERYTHING in init() -- just be aware that reintroduces
- *     the bug this version was rewritten to avoid (see the note below).
- *
- * FIXED ON REVIEW: the first version of this file called a full
- * clearWidgets()+init() rebuild from *inside* the search box's own
- * setResponder callback -- i.e. every keystroke destroyed and recreated the
- * text field that was still in the middle of handling that keystroke. That
- * risks losing focus after every character (or worse). This version only
- * ever tears down and re-adds the checkbox ROWS (refreshRows()); the search
- * box, and the Select All/None/Save/Back buttons, are created once in
- * init() and never touched again.
+ * refreshRows() only tears down and re-adds the checkbox rows, never the
+ * search box or the other buttons, so it's safe to call from inside the
+ * search box's own setResponder callback without disrupting whatever
+ * keystroke is still being handled.
  */
 public class SongListScreen extends Screen {
 
-	private static final int ROWS_VISIBLE = 8;
 	private static final int ROW_HEIGHT = 20;
 	private static final int LIST_TOP = 76;
+	// Space reserved below the list for the status line and the Back button,
+	// so rowsVisible (computed per-screen-size in init()) never overlaps them.
+	private static final int BOTTOM_RESERVED = 54;
 
 	private final Screen parent;
 	private final Path worldSaveDir; // null = editing the global library
@@ -66,6 +43,7 @@ public class SongListScreen extends Screen {
 	private Set<String> workingEnabled;
 	private String searchText = "";
 	private int scrollOffset = 0;
+	private int rowsVisible = 8; // recalculated in init() from the actual window height
 	private final List<String> filteredIds = new ArrayList<>();
 	private final List<Checkbox> rowWidgets = new ArrayList<>();
 
@@ -87,8 +65,10 @@ public class SongListScreen extends Screen {
 			}
 		}
 
+		rowsVisible = Math.max(1, (this.height - BOTTOM_RESERVED - LIST_TOP) / ROW_HEIGHT);
 		recomputeFiltered();
-		rowWidgets.clear(); // init() only runs fresh (screen resize, first open) -- old Checkbox objects from before are gone with it either way
+		clampScrollOffset();
+		rowWidgets.clear(); // init() runs fresh on every resize, so old Checkbox objects are already gone
 
 		EditBox search = new EditBox(this.font, this.width / 2 - 100, 24, 200, 20, Component.literal("Search"));
 		search.setValue(searchText);
@@ -131,11 +111,16 @@ public class SongListScreen extends Screen {
 		}
 	}
 
+	private void clampScrollOffset() {
+		int maxOffset = Math.max(0, filteredIds.size() - rowsVisible);
+		scrollOffset = Math.max(0, Math.min(maxOffset, scrollOffset));
+	}
+
 	/**
 	 * Swaps out just the checkbox rows for the current filter/scroll state.
-	 * Deliberately does NOT touch the search box or the other buttons, so
-	 * this is safe to call from inside their own callbacks (see the class
-	 * javadoc for why that distinction matters).
+	 * Doesn't touch the search box or the other buttons, so it's safe to
+	 * call from inside their own callbacks (see the search box's
+	 * setResponder above).
 	 */
 	private void refreshRows() {
 		for (Checkbox cb : rowWidgets) {
@@ -143,7 +128,7 @@ public class SongListScreen extends Screen {
 		}
 		rowWidgets.clear();
 
-		int end = Math.min(filteredIds.size(), scrollOffset + ROWS_VISIBLE);
+		int end = Math.min(filteredIds.size(), scrollOffset + rowsVisible);
 		for (int i = scrollOffset; i < end; i++) {
 			String songId = filteredIds.get(i);
 			LibraryStore.Info info = library.songs.get(songId);
@@ -165,7 +150,7 @@ public class SongListScreen extends Screen {
 
 	@Override
 	public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-		int maxOffset = Math.max(0, filteredIds.size() - ROWS_VISIBLE);
+		int maxOffset = Math.max(0, filteredIds.size() - rowsVisible);
 		int newOffset = Math.max(0, Math.min(maxOffset, scrollOffset - (int) Math.signum(scrollY)));
 		if (newOffset != scrollOffset) {
 			scrollOffset = newOffset;
@@ -193,7 +178,7 @@ public class SongListScreen extends Screen {
 		super.extractRenderState(gfx, mouseX, mouseY, partialTick);
 		gfx.centeredText(this.font, this.title, this.width / 2, 8, 0xFFFFFFFF);
 		String status = filteredIds.size() + " songs shown, " + workingEnabled.size() + " enabled"
-				+ (filteredIds.size() > ROWS_VISIBLE ? " -- scroll for more" : "");
+				+ (filteredIds.size() > rowsVisible ? " (scroll for more)" : "");
 		gfx.centeredText(this.font, status, this.width / 2, this.height - 46, 0xFFA0A0A0);
 	}
 

@@ -5,10 +5,10 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.minecraft.server.packs.repository.PackRepository;
 
 /**
- * Deliberately does almost nothing itself -- the menu button lives in
- * TitleScreenMixin, and the screens under com.musicdiscs.gui do the rest.
- * All the scan/convert/register work happens in MusicDiscsMod's common
- * onInitialize(), which only runs its scan on the physical client.
+ * Does almost nothing itself: the menu button lives in TitleScreenMixin,
+ * and the screens under com.musicdiscs.gui do the rest. Scan/convert/register
+ * work happens in MusicDiscsMod's common onInitialize(), which only runs
+ * its scan on the physical client.
  */
 public class MusicDiscsClientMod implements ClientModInitializer {
 	@Override

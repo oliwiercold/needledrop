@@ -19,9 +19,9 @@ public class MusicScanner {
 	/**
 	 * Walks musicFolder looking for files with one of the given extensions.
 	 * Returns at most maxDiscs entries (sorted by path, so the result is stable
-	 * between runs; maxDiscs is a safety valve, not a real limit -- see
+	 * between runs; maxDiscs is a safety valve, not a real limit, see
 	 * ModConfig). If the folder doesn't exist, returns an empty list instead
-	 * of throwing -- that's a config problem, not a crash.
+	 * of throwing, since that's a config problem, not a crash.
 	 */
 	public static List<DiscEntry> scan(Path musicFolder, Set<String> extensions, int maxDiscs) {
 		List<DiscEntry> results = new ArrayList<>();
@@ -60,7 +60,7 @@ public class MusicScanner {
 		return extensions.contains(name.substring(dot + 1));
 	}
 
-	/** First 8 hex chars of a SHA-256 hash -- plenty unique for a personal music library, and stable across restarts. */
+	/** First 8 hex chars of a SHA-256 hash, plenty unique for a personal music library, and stable across restarts. */
 	private static String shortHash(String input) {
 		try {
 			MessageDigest digest = MessageDigest.getInstance("SHA-256");
